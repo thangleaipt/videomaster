@@ -15,7 +15,7 @@ from controller.mivolo.person_model import PersonModel
 from controller.Face_recognition.report import send_report_to_db
 
 from server.config import DATE_TIME_FORMAT, DATETIME_FORMAT
-from server.reports.services import add_video_service
+from server.reports.services import add_report_service, add_video_service
 import cv2
 from controller.Face_recognition.analyze_video_insightface import FaceAnalysisInsightFace
 from controller.mivolo.predictor import Predictor
@@ -478,10 +478,10 @@ class SubVideoAnalyze(QRunnable):
                     if (self.list_person_model[index].counting_tracking % 5 == 0 or self.list_person_model[index].counting_tracking == 1 or (self.list_person_model[index].label_name != label_name and label_name is not None)):
                         if label_name is not None:
                             self.list_person_model[index].label_name = label_name
-                        if gender is not None:
-                            self.list_person_model[index].average_gender = gender
-                        else:
+                        if len(self.list_person_model[index].list_gender) > 0:
                             self.list_person_model[index].average_gender = self.count_most_frequent_element(self.list_person_model[index].list_gender)
+                        else:
+                            self.list_person_model[index].average_gender = gender
 
                         self.list_person_model[index].average_age = self.average_number(self.list_person_model[index].list_age)
                         self.list_person_model[index].average_check_mask = label_mask
@@ -519,15 +519,12 @@ class SubVideoAnalyze(QRunnable):
 
                         cv2.imwrite(path_image, image_save)
                         self.list_person_model[index].list_image_path.append(path_image)
-                        # if self.list_person_model[index].counting_telegram < 5:
-                        # self.telegram_buffer.put([path_image, self.list_person_model[index], self.telegrams])
-                        # self.list_person_model[index].counting_telegram += 1
             
             # Send data to report
-            if self.frame_count - self.index_frame < 3:
+            if self.frame_count - self.index_frame < 10:
                 logging.info(f"[analyze_video][index_frame] Send data to report: {self.index_frame}, {len(self.list_person_model)}")
                 if len(self.list_person_model) > 0:
-                    send_report_to_db(self)
+                    self.send_report_to_db()
                     self.list_total_id = []
                     self.list_person_model = []
                 
@@ -536,7 +533,43 @@ class SubVideoAnalyze(QRunnable):
             print(f'[{datetime.now().strftime(DATETIME_FORMAT)}][analyze][generate_frames]: {e}')
             logging.exception(f'[analyze][generate_frames]: {e}')
             return image,[]
-
+        
+    def send_report_to_db(self):
+        for i, person_model in enumerate(self.list_person_model):
+            if len(person_model.list_image_path) == []:
+                continue
+            if person_model.average_gender is not None:
+                if person_model.average_gender[0] == "male" or person_model.average_gender == "male":
+                    gender = 1
+                elif person_model.average_gender[0] == "female" or person_model.average_gender == "female":
+                    gender = 0
+            else:
+                gender = 2
+            # gender = person_model.average_gender
+            if person_model.average_age is not None:
+                age = int(person_model.average_age)
+            else: 
+                age = 0
+            person_model_time = datetime.strptime(person_model.time, "%Y-%m-%d %H:%M:%S")
+            # Lấy timestamp
+            time_model = person_model_time.timestamp()
+            # time_model = datetime.timestamp(person_model.time)
+            if person_model.average_check_mask == "Mask":
+                mask = 1
+            else:
+                mask = 0
+            if person_model.average_check_glasses == True:
+                glasses = 1
+            else:
+                glasses = 0
+            main_color_clothes = person_model.code_color
+            name_color = person_model.name_color
+            if person_model.label_name is None or person_model.label_name == "":
+                person_name = f"random_{uuid.uuid4()}"
+            else:
+                person_name = person_model.label_name
+            print(f"Report: {person_name}: {person_model.id}, {age}, {gender}, {mask}, {main_color_clothes}, {time_model}, {person_model.list_image_path}")
+            add_report_service(self.video_path_report, person_name, age, gender, mask, main_color_clothes, time_model, person_model.list_image_path)
                 
 class CameraWidget(QWidget):
     def __init__(self, path, index, path_origin,parent=None):
@@ -548,39 +581,39 @@ class CameraWidget(QWidget):
         self.list_camera = parent.list_camera
         self.list_camera_screen = parent.list_camera_screen
         self.grid_layout = parent.grid_layout
-        self.ref_layout = parent.ref_layout
+        # self.ref_layout = parent.ref_layout
 
         self.camera_layout = QVBoxLayout()
 
         self.camera_label = QLabel(self)
-        self.close_button = QPushButton(self)
+        # self.close_button = QPushButton(self)
 
-        self.close_button.setObjectName(u"close_button_{}".format(index))
-        self.close_button.setStyleSheet(u"QPushButton {\n"
-            "	border: 2px solid rgb(27, 29, 35);\n"
-            "	border-radius: 5px;	\n"
-            "	background-color: rgb(27, 29, 35);\n"
-            "}\n"
-            "QPushButton:hover {\n"
-            "	background-color: rgb(57, 65, 80);\n"
-            "	border: 2px solid rgb(61, 70, 86);\n"
-            "}\n"
-            "QPushButton:pressed {	\n"
-            "	background-color: rgb(35, 40, 49);\n"
-            "	border: 2px solid rgb(43, 50, 61);\n"
-            "}")
-        self.close_button.setIcon(QIcon(u":/16x16/icons/16x16/cil-x.png"))
-        self.close_button.setIconSize(QSize(16, 16))
-        self.close_button.setFixedSize(30, 30)
+        # self.close_button.setObjectName(u"close_button_{}".format(index))
+        # self.close_button.setStyleSheet(u"QPushButton {\n"
+        #     "	border: 2px solid rgb(27, 29, 35);\n"
+        #     "	border-radius: 5px;	\n"
+        #     "	background-color: rgb(27, 29, 35);\n"
+        #     "}\n"
+        #     "QPushButton:hover {\n"
+        #     "	background-color: rgb(57, 65, 80);\n"
+        #     "	border: 2px solid rgb(61, 70, 86);\n"
+        #     "}\n"
+        #     "QPushButton:pressed {	\n"
+        #     "	background-color: rgb(35, 40, 49);\n"
+        #     "	border: 2px solid rgb(43, 50, 61);\n"
+        #     "}")
+        # self.close_button.setIcon(QIcon(u":/16x16/icons/16x16/cil-x.png"))
+        # self.close_button.setIconSize(QSize(16, 16))
+        # self.close_button.setFixedSize(30, 30)
 
         self.camera_layout.addWidget(self.camera_label)
-        self.camera_layout.addWidget(self.close_button)
+        # self.camera_layout.addWidget(self.close_button)
 
         self.camera_label.setObjectName(u"camera_label_{}".format(index))
         self.camera_label.setStyleSheet("border: 2px solid red;")
         self.camera_label.setText("Loading...")
 
-        self.close_button.clicked.connect(self.stop_camera)
+        # self.close_button.clicked.connect(self.stop_camera)
         self.camera_label.setAlignment(Qt.AlignCenter)
 
         self.setLayout(self.camera_layout)
@@ -651,33 +684,33 @@ class CameraWidget(QWidget):
             # self.camera_label.setPixmap(scaled_pixmap)
             self.camera_label.setText(f"Percent: {frame}%")
 
-    def update_ui(self, list_image_label):
-        try:
-            for i in range(len(list_image_label)):
-                self.h_layout = QHBoxLayout()  # Create a QHBoxLayout for each row
-                self.recognition_image = cv2.imread(list_image_label[i][0])
-                self.recognition_image = cv2.cvtColor(self.recognition_image, cv2.COLOR_BGR2RGB)
-                self.recognite_image = QImage(self.recognition_image, self.recognition_image.shape[1], self.recognition_image.shape[0], self.recognition_image.shape[2]*self.recognition_image.shape[1], QImage.Format_RGB888)
-                self.image_label = QLabel(f"Label {i * 2 + 1}")
+    # def update_ui(self, list_image_label):
+    #     try:
+    #         for i in range(len(list_image_label)):
+    #             self.h_layout = QHBoxLayout()  # Create a QHBoxLayout for each row
+    #             self.recognition_image = cv2.imread(list_image_label[i][0])
+    #             self.recognition_image = cv2.cvtColor(self.recognition_image, cv2.COLOR_BGR2RGB)
+    #             self.recognite_image = QImage(self.recognition_image, self.recognition_image.shape[1], self.recognition_image.shape[0], self.recognition_image.shape[2]*self.recognition_image.shape[1], QImage.Format_RGB888)
+    #             self.image_label = QLabel(f"Label {i * 2 + 1}")
 
-                if list_image_label[i][1] is not None and list_image_label[i][1] != "":
-                    self.image_label.setStyleSheet("border: 1px solid green; border-radius: 5px; margin-bottom: 5px;")
-                else:
-                    self.image_label.setStyleSheet("border: 1px solid red; border-radius: 5px; margin-bottom: 5px;")
-                self.image_label.setPixmap(QPixmap.fromImage(self.recognite_image))
-                # image_label.setScaledContents(True)
-                self.text_label = QLabel(f"Label {i * 2 + 2}")
-                self.text_label.setStyleSheet("border: 1px solid gray; border-radius: 5px; margin-bottom: 5px;")
+    #             if list_image_label[i][1] is not None and list_image_label[i][1] != "":
+    #                 self.image_label.setStyleSheet("border: 1px solid green; border-radius: 5px; margin-bottom: 5px;")
+    #             else:
+    #                 self.image_label.setStyleSheet("border: 1px solid red; border-radius: 5px; margin-bottom: 5px;")
+    #             self.image_label.setPixmap(QPixmap.fromImage(self.recognite_image))
+    #             # image_label.setScaledContents(True)
+    #             self.text_label = QLabel(f"Label {i * 2 + 2}")
+    #             self.text_label.setStyleSheet("border: 1px solid gray; border-radius: 5px; margin-bottom: 5px;")
             
-                if len(list_image_label[i]) > 1:
-                    self.text_label.setText(self.update_text(list_image_label[i]))
-                else:
-                    self.text_label.setText(f"")
-                self.h_layout.addWidget(self.image_label)
-                self.h_layout.addWidget(self.text_label)
-                self.ref_layout.insertLayout(0, self.h_layout)
-        except Exception as e:
-            print(f"[update_ui]: {e}")
+    #             if len(list_image_label[i]) > 1:
+    #                 self.text_label.setText(self.update_text(list_image_label[i]))
+    #             else:
+    #                 self.text_label.setText(f"")
+    #             self.h_layout.addWidget(self.image_label)
+    #             self.h_layout.addWidget(self.text_label)
+    #             self.ref_layout.insertLayout(0, self.h_layout)
+    #     except Exception as e:
+    #         print(f"[update_ui]: {e}")
     
     def update_text(self,label):
         label_text = f"<b>Họ và tên: {label[1]}</b>"

@@ -38,8 +38,8 @@ class Tracker:
         track_result = self.tracker.update(pred_np, frame)
         result = []
         for r in track_result:
-            xyxy = r[0:4].astype(np.int32)
+            xyxy = r[0:5].astype(np.int32)
             id = int(r[4])
-            result.append([xyxy[0],xyxy[1],xyxy[2],xyxy[3], id])
+            result.append([xyxy[0],xyxy[1],xyxy[2],xyxy[3], id, r[5]])
 
         return result

@@ -23,6 +23,10 @@ from PySide2.QtMultimedia import QMediaPlayer, QMediaContent
 from PySide2.QtMultimediaWidgets import QVideoWidget
 from PIL import Image
 from ultralytics import YOLO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
@@ -36,7 +40,6 @@ device = torch.device(0)
 
 model = YOLO('models/yolov8m.pt')
 model.to(device)
-
 
 class PAGEIMAGEVIEW(QDialog):
         def __init__(self, list_image_path=None, video_id=None, parent=None):
@@ -109,7 +112,6 @@ class PAGEREPORT(QDialog):
                 self.set_ui()
                 self.retranslateUi()
                 self.setWindowTitle(f"{index}")
-
         def set_ui(self):
                 self.verticalLayout_6 = QVBoxLayout(self)
                 self.verticalLayout_6.setObjectName(u"verticalLayout_6")
@@ -201,8 +203,20 @@ class PAGEREPORT(QDialog):
                 self.filter_layout.addLayout(self.mask_layout)
                 self.filter_layout.addSpacing(50)
 
+                self.checkface_layout = QHBoxLayout()
+                checkface_label = QLabel("Nhận diện:", self.filter_groupbox)
+                self.checkface_layout.addWidget(checkface_label)
+                self.checkface_layout.addSpacing(2)
+                self.checkface_combobox = QComboBox(self.filter_groupbox)
+                self.checkface_combobox.setObjectName(u"mask_box")
+                self.checkface_combobox.setFixedSize(100, 50)
+                self.checkface_combobox.addItems(["Tất cả", "Mặt trước", "Mặt sau"])
+                self.checkface_layout.addWidget(self.checkface_combobox)
+                self.filter_layout.addLayout(self.checkface_layout)
+                self.filter_layout.addSpacing(50)
+
                 # Buton Search
-                self.search_button = QPushButton("Search", self.filter_groupbox)
+                self.search_button = QPushButton("Tìm kiếm", self.filter_groupbox)
                 self.search_button.setObjectName(u"search_button")
                 self.search_button.setFixedSize(100, 50)
                 self.filter_layout.addWidget(self.search_button)
@@ -225,7 +239,7 @@ class PAGEREPORT(QDialog):
                 self.search_button.clicked.connect(self.get_list_report)
 
                  # Buton Search
-                self.import_button = QPushButton("Import", self.filter_groupbox)
+                self.import_button = QPushButton("Lọc ảnh", self.filter_groupbox)
                 self.import_button.setObjectName(u"import_button")
                 self.import_button.setFixedSize(100, 50)
                 self.filter_layout.addWidget(self.import_button)
@@ -246,6 +260,29 @@ class PAGEREPORT(QDialog):
                 icon3.addFile(u":/16x16/icons/16x16/cil-magnifying-glass.png", QSize(), QIcon.Normal, QIcon.Off)
                 self.import_button.setIcon(icon3)
                 self.import_button.clicked.connect(self.import_image_query)
+
+                # Export report
+                self.export_button = QPushButton("Xuất File", self.filter_groupbox)
+                self.export_button.setObjectName(u"import_button")
+                self.export_button.setFixedSize(100, 50)
+                self.filter_layout.addWidget(self.export_button)
+                self.export_button.setStyleSheet(u"QPushButton {\n"
+                "	border: 2px solid rgb(27, 29, 35);\n"
+                "	border-radius: 5px;	\n"
+                # "	background-color: rgb(27, 29, 35);\n"
+                "}\n"
+                "QPushButton:hover {\n"
+                "	background-color: rgb(57, 65, 80);\n"
+                "	border: 2px solid rgb(61, 70, 86);\n"
+                "}\n"
+                "QPushButton:pressed {	\n"
+                "	background-color: rgb(35, 40, 49);\n"
+                "	border: 2px solid rgb(43, 50, 61);\n"
+                "}")
+                icon3 = QIcon()
+                icon3.addFile(u":/16x16/icons/16x16/cil-cloud-download.png", QSize(), QIcon.Normal, QIcon.Off)
+                self.export_button.setIcon(icon3)
+                self.export_button.clicked.connect(self.create_pdf_report)
 
 
                 # Add the filter group box to the main layout
@@ -456,7 +493,15 @@ class PAGEREPORT(QDialog):
                         begin_age = int(age.split("-")[0])
                         end_age = int(age.split("-")[1])
                 print(f"begin_age: {begin_age} end_age: {end_age}")
-                self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask)
+
+                checkface = self.checkface_combobox.currentText()
+                if checkface == "Mặt trước":
+                        isface = 1
+                elif checkface == "Mặt sau":
+                        isface = 0
+                else:
+                        isface = None
+                self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
                 self.list_reports_filter = self.list_reports
                 self.fill_report()
 
@@ -472,9 +517,12 @@ class PAGEREPORT(QDialog):
                 return dt_vietnam_str
 
         def fill_report(self):
-                if len(self.list_reports) >= 16:
+                
+                if len(self.list_reports_filter) >= 16:
                         self.tableWidget.setRowCount(len(self.list_reports_filter))
                 else:
+                        if len(self.list_reports_filter) == 0:
+                                QMessageBox.information(self, "Notification", "Không tìm thấy kết quả.")
                         self.tableWidget.setRowCount(16)
                 self.tableWidget.clearContents()
 
@@ -539,6 +587,8 @@ class PAGEREPORT(QDialog):
                 list_image_path = []
                 if selected_rows:
                         item = [index.row() for index in selected_rows][0]
+                        if item >= len(self.list_reports_filter):
+                                return
                         list_image = self.list_reports_filter[item]['images']
                         video_id = self.list_reports_filter[item]['id']
                         for image in list_image:
@@ -565,76 +615,160 @@ class PAGEREPORT(QDialog):
         def import_image_query(self):
                 file_dialog = QFileDialog()
                 file_dialog.setNameFilter("Image files (*.jpeg *.jpg *.png)")
-                file_dialog.setFileMode(QFileDialog.ExistingFile)
+                file_dialog.setFileMode(QFileDialog.ExistingFiles)
                 file_dialog.setViewMode(QFileDialog.Detail)
 
                 self.list_reports_filter = []
-                max_similarity = 0
                 max_report = None
                 min_report = None
 
                 if file_dialog.exec_():
-                        file_path = file_dialog.selectedFiles()
-                        if file_path:
-                                print("Selected file:", file_path[0])
-                                frame_import = cv2.imread(file_path[0])
-                                list_instance = self.analyzer.analyze_detect_face(frame_import)
+                        list_file_path = file_dialog.selectedFiles()
+                        if list_file_path:
+                                for file_path in list_file_path:
+                                        print("Selected file:", file_path)
+                                        frame_import = cv2.imread(file_path)
+                                        list_instance = self.analyzer.analyze_detect_face(frame_import)
 
-                                if len(list_instance) > 0 and list_instance[0][1] is not None:
-                                        for report in self.list_reports:
-                                                if unidecode(report['person_name']).lower() == unidecode(list_instance[0][1]).lower():
-                                                        self.list_reports_filter.append(report)
-                                # Unknown person and have face
-                                elif len(list_instance) > 0 and list_instance[0][1] is None: 
-                                        feature_image_import = self.analyzer.get_feature(frame_import)[0]
-                                        for report in self.list_reports:
-                                                list_path_image = []
-                                                list_class_image = report['images']
-                                                for image in list_class_image:
-                                                        list_path_image.append(image['path'])
-                                                for path_image in list_path_image:
-                                                        frame_ref = cv2.imread(path_image)
-                                                        feature_ref = self.analyzer.get_feature(frame_ref)
-                                                        if len(feature_ref) > 0:
-                                                                similarity = self.analyzer.rec.compute_sim(feature_image_import, feature_ref[0])
-                                                        else:
-                                                                similarity = 0
-                                                        if max_similarity < similarity and similarity > 0.45:
-                                                                max_similarity = similarity
-                                                                max_report = report
-                                                               
-                                                print(f"max_similarity: {max_similarity}")
-
-                                                if max_report is not None and max_report not in self.list_reports_filter:             
-                                                        self.list_reports_filter.append(max_report)
-                                if len(self.list_reports_filter) == 0:
-                                        h_import,w1_import,_ = frame_import.shape
-                                        xyxys_import =  np.array([[0,0,w1_import,h_import]])
-                                        feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
-                                        min_similarity = 1
-                                        for report in self.list_reports:
-                                                list_path_image = []
-                                                list_class_image = report['images']
-                                                for image in list_class_image:
-                                                        list_path_image.append(image['path'])
-                                                for path_image in list_path_image:
-                                                        frame_ref = cv2.imread(path_image)
-                                                        results = model(frame_ref,classes=[0],conf=0.4,verbose=False)
-                                                        pred_boxes = results[0].boxes
-                                                        for pred in pred_boxes:
-                                                                box = pred.xyxy.squeeze().tolist()
-                                                                xyxys_ref =  np.array([[box[0],box[1],box[2],box[3]]])
-                                                                feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
-                                                                dist = self._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
-                                                                if min_similarity > dist and dist < 0.2:
-                                                                        min_similarity = dist
-                                                                        min_report = report
-                                                                       
-                                                                print(f"distance_similarity: {dist} {image['path']}")
-                                                if min_report is not None and min_report not in self.list_reports_filter:             
-                                                        self.list_reports_filter.append(min_report)
-                                
-                                if len(self.list_reports_filter) == 0:
-                                        QMessageBox.information(self, "Notification", "Không tìm thấy kết quả.")
+                                        if len(list_instance) > 0 and list_instance[0][1] is not None:
+                                                for report in self.list_reports:
+                                                        if unidecode(report['person_name']).lower() == unidecode(list_instance[0][1]).lower():
+                                                                self.list_reports_filter.append(report)
+                                        # Unknown person and have face
+                                        elif len(list_instance) > 0 and list_instance[0][1] is None: 
+                                                feature_image_import = self.analyzer.get_feature(frame_import)[0]
+                                                for report in self.list_reports:
+                                                        list_path_image = []
+                                                        list_class_image = report['images']
+                                                        for image in list_class_image:
+                                                                list_path_image.append(image['path'])
+                                                        for path_image in list_path_image:
+                                                                frame_ref = cv2.imread(path_image)
+                                                                feature_ref = self.analyzer.get_feature(frame_ref)
+                                                                if len(feature_ref) > 0:
+                                                                        similarity = self.analyzer.rec.compute_sim(feature_image_import, feature_ref[0])
+                                                                else:
+                                                                        similarity = 0
+                                                                if similarity > 0.43:
+                                                                        max_report = report
+                                                                        break
+                                                                
+                                                        if max_report is not None and max_report not in self.list_reports_filter:             
+                                                                self.list_reports_filter.append(max_report)
+                                        elif len(list_instance) == 0:
+                                                h_import,w1_import,_ = frame_import.shape
+                                                xyxys_import =  np.array([[0,0,w1_import,h_import]])
+                                                feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
+                                                for report in self.list_reports:
+                                                        list_path_image = []
+                                                        list_class_image = report['images']
+                                                        for image in list_class_image:
+                                                                list_path_image.append(image['path'])
+                                                        for path_image in list_path_image:
+                                                                frame_ref = cv2.imread(path_image)
+                                                                results = model(frame_ref,classes=[0],conf=0.4,verbose=False)
+                                                                pred_boxes = results[0].boxes
+                                                                for pred in pred_boxes:
+                                                                        box = pred.xyxy.squeeze().tolist()
+                                                                        xyxys_ref =  np.array([[box[0],box[1],box[2],box[3]]])
+                                                                        feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
+                                                                        dist = self._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
+                                                                        if dist < 0.25:
+                                                                                min_report = report
+                                                                        
+                                                        if min_report is not None and min_report not in self.list_reports_filter:             
+                                                                self.list_reports_filter.append(min_report)
                                 self.fill_report()
+
+        def create_pdf_report(self):
+                file_path = f"output_{self.video_id}_{time.strftime('%Y%m%d%H%M%S')}.pdf"
+                font_path = "back-end/fonts/segoeui.ttf"
+                pdfmetrics.registerFont(TTFont("Segoe UI", font_path))
+                font_path_b = "back-end/fonts/segoeuib.ttf"
+                pdfmetrics.registerFont(TTFont("Segoe UI Bold", font_path_b))
+                # Khởi tạo canvas để vẽ PDF
+                pdf_canvas = canvas.Canvas(file_path, pagesize=letter)
+
+                items_per_page = 7
+                total_items = len(self.list_reports_filter)
+                total_pages = (total_items + items_per_page - 1) // items_per_page
+                index_report = 0
+                
+                for page_number in range(total_pages):
+                        # Tạo tiêu đề
+                        pdf_canvas.setFont("Segoe UI", 8)
+                        pdf_canvas.drawString(72, 1000, "Bảng Thông Tin Báo Cáo")
+
+                        # Tạo bảng
+                        table_data = [['STT', 'Tên', 'Tuổi', 'Giới Tính', 'Khẩu trang', 'Màu sắc', 'Thời gian', 'Hình ảnh']]
+
+                        start_index = page_number * items_per_page
+                        end_index = min((page_number + 1) * items_per_page, total_items)
+
+
+                        for i, report in enumerate(self.list_reports_filter[start_index:end_index]):
+                                index_report += 1
+                                if 'random' in report['person_name']:
+                                        name = "Người lạ"
+                                else:
+                                        name = report['person_name']
+                                if report['age'] is None:
+                                        age = "Không xác định"
+                                else:
+                                        age = report['age']
+                                if report['gender'] == 1:
+                                        gender = "Nam"
+                                elif report['gender'] == 0:
+                                        gender = "Nữ"
+                                else:
+                                        gender = "Không xác định"
+                                if report['mask'] == 1:
+                                        mask = "Có"
+                                elif report['mask'] == 0:
+                                        mask = "Không"
+                                if report['code_color'] is None:
+                                        color = "Không xác định"
+                                else:
+                                        color = report['code_color']
+
+                                row_data = [
+                                        str(index_report),
+                                        name,
+                                        age,
+                                        gender,
+                                        mask,
+                                        color,
+                                        str(self.convert_timestamp_to_datetime(report['time'])),
+                                ]
+
+                                table_data.append(row_data)
+
+                        # Vẽ bảng
+                        row_height = 80
+                        col_widths = [40, 40, 60, 60, 60, 60, 60, 65]
+
+                        for j, header in enumerate(table_data[0]):
+                                pdf_canvas.setFont("Segoe UI Bold", 8, leading=10)
+                                pdf_canvas.drawString(j * col_widths[j] + 50, 780- (0 + 1) * row_height, header)
+
+                        # for i, row in enumerate(table_data):
+                        #         for j, data in enumerate(row):
+                        #                 pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 1) * row_height, str(data))
+
+                        for i, row in enumerate(table_data[1:]):  # Bỏ qua dòng tiêu đề khi vẽ dữ liệu
+                                for j, data in enumerate(row):
+                                        pdf_canvas.setFont("Segoe UI", 8, leading=10)  # Đặt lại font cho dữ liệu
+                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, str(data))
+
+                        # Vẽ hình ảnh
+                        for i, report in enumerate(self.list_reports_filter[start_index:end_index]):
+                                if len(report.get('images', [])) > 0:
+                                        image_path = report['images'][0]['path']
+                                        pdf_canvas.drawInlineImage(image_path, 50 + 440, 780 - (i+2) * row_height-30, width=60, height=60)
+                                else:
+                                        pdf_canvas.drawString(50 + 440, 780 - (i+2) * row_height-20, "Không có hình ảnh")
+                        
+                        pdf_canvas.showPage()
+                # Lưu file PDF
+                pdf_canvas.save()
                                                         

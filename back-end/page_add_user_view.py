@@ -7,9 +7,7 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
 
 from PyQt5.QtCore import QTimer
 from PySide2.QtWidgets import *
-from server.reports.services import add_video_service
-from controller.Face_recognition.subVideoAnalyze import SubVideoAnalyze
-from model.CameraCapture import VideoWriterWidget
+
 import cv2
 
 class PAGEADDUSER(QWidget):

@@ -20,9 +20,7 @@ class Login(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(474, 682)
-        icon = QIcon()
-        icon.addFile(u":/img/logo.png", QSize(), QIcon.Normal, QIcon.Off)
-        MainWindow.setWindowIcon(icon)
+       
         MainWindow.setWindowOpacity(1.000000000000000)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
@@ -46,9 +44,9 @@ class Login(object):
         self.frame_Object = QFrame(self.frame_Shadow)
         self.frame_Object.setObjectName(u"frame_Object")
         self.frame_Object.setStyleSheet(u"QFrame{\n"
-"border:0px;\n"
-" background: none;\n"
-"}")
+        "border:0px;\n"
+        " background: none;\n"
+        "}")
         self.frame_Object.setFrameShape(QFrame.StyledPanel)
         self.frame_Object.setFrameShadow(QFrame.Raised)
         self.pushButton_Login = QPushButton(self.frame_Object)
@@ -143,13 +141,19 @@ class Login(object):
         self.frame_Logo.setObjectName(u"frame_Logo")
         self.frame_Logo.setGeometry(QRect(120, 70, 241, 211))
         self.frame_Logo.setStyleSheet(u"QFrame{\n"
-"border:0px;\n"
-"background: rgb(52, 59, 72);\n"
-"	background-color: rgba(27, 29, 35, 160);\n"
-"  background-repeat: no-repeat;\n"
-" border-radius: 10px;\n"
-"}\n"
-"")
+        "border:0px;\n"
+        "background: rgb(52, 59, 72);\n"
+        "	background-color: rgba(27, 29, 35, 160);\n"
+        "  background-repeat: no-repeat;\n"
+        " border-radius: 10px;\n"
+        "}\n"
+        "")
+        self.label_logo = QLabel(self.frame_Logo)
+        self.label_logo.setObjectName(u"label_logo")
+        self.label_logo.setGeometry(QRect(0, 0, 241, 211))
+        self.label_logo.setScaledContents(True)
+        pixmap = QPixmap(r"icons\img\photo_2023-12-06_16-22-01.jpg")
+        self.label_logo.setPixmap(pixmap)
         self.frame_Logo.setFrameShape(QFrame.StyledPanel)
         self.frame_Logo.setFrameShadow(QFrame.Raised)
         self.frame_TopBar = QFrame(self.frame_Object)

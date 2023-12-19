@@ -8,10 +8,12 @@ from PySide2.QtGui import (QIcon)
 from PySide2.QtWidgets import *
 from server.reports.services import add_video_service
 from controller.Face_recognition.analyze_video_insightface import FaceAnalysisInsightFace
-from controller.Face_recognition.subVideoAnalyze import CameraWidget
+from controller.Face_recognition.subHumanAnalyze import CameraWidget
 import cv2
 import moviepy.editor as mp
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+
+segment_count = 4
 
 class MyDialog(QDialog):
     def __init__(self):
@@ -71,7 +73,7 @@ class MyDialog(QDialog):
             "}"
         )
 
-class PAGEVIDEO(QWidget):
+class PAGEHUMAN(QWidget):
     def __init__(self):
         super().__init__()
         self.new_size = 0
@@ -81,7 +83,7 @@ class PAGEVIDEO(QWidget):
         self.list_camera = []
         self.thread_pool = QThreadPool()
         self.set_ui()
-        self.setObjectName(u"page_camera")
+        self.setObjectName(u"page_human")
     def set_ui(self):
         self.main_layout = QHBoxLayout(self)
         self.control_layout = QVBoxLayout()
@@ -92,12 +94,12 @@ class PAGEVIDEO(QWidget):
         self.list_camera_layout = {}
         self.list_close_button = {}
        
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        scroll_content = QWidget()
-        self.ref_layout = QVBoxLayout(scroll_content)
+        # self.scroll_area = QScrollArea()
+        # self.scroll_area.setWidgetResizable(True)
+        # scroll_content = QWidget()
+        # self.ref_layout = QVBoxLayout(scroll_content)
          # Set the content widget for the scroll area
-        self.scroll_area.setWidget(scroll_content)
+        # self.scroll_area.setWidget(scroll_content)
     
         # Add video button
         self.add_video_button = QPushButton("Add Video")
@@ -124,29 +126,26 @@ class PAGEVIDEO(QWidget):
         self.control_layout.addLayout(self.grid_layout)
         self.control_layout.addLayout(self.add_button_layout)
         self.main_layout.addLayout( self.control_layout)
-        self.main_layout.addWidget(self.scroll_area)
+        # self.main_layout.addWidget(self.scroll_area)
+        self.init_camera()
 
     def init_camera(self):
-        if len(self.list_camera) >4 :
+        if segment_count >4 :
             num_col = 3
-        elif len(self.list_camera) == 1:
+        elif segment_count == 1:
             num_col = 1
         else:
             num_col = 2
-        self.thread_pool.setMaxThreadCount(len(self.list_camera))
-        for i,path in enumerate(self.list_camera):
-            if path not in self.list_camera_screen.keys():
-                camera_widget = CameraWidget(path, i + 1,self.file_path ,self)
-                self.grid_layout.addWidget(camera_widget, i // num_col, i % num_col, 1, 1)
-                self.list_camera_screen[path] = camera_widget
-    
-  
+        self.thread_pool.setMaxThreadCount(segment_count)
+        for i in range(segment_count):
+            camera_widget = CameraWidget(i + 1,self)
+            self.grid_layout.addWidget(camera_widget, i // num_col, i % num_col, 1, 1)
+            self.list_camera_screen[i] = camera_widget
+
     def resizeEvent(self, event):
         # Override the resizeEvent to handle window resize
         self.new_size = event.size()
-        self.scroll_area.setFixedSize(int(self.new_size.width()/10* 2), self.new_size.height())
         self.add_video_button.setFixedSize(int(self.new_size.width()/10* 2), 50)
-
         # Call the base class implementation
         super().resizeEvent(event)
 
@@ -166,8 +165,6 @@ class PAGEVIDEO(QWidget):
             
             segment_duration = int(clip_duration/4)
             
-            # segment_count = math.ceil(clip_duration / segment_duration)
-            segment_count = 4
             remainder = clip_duration % segment_duration
             os.makedirs(output_folder, exist_ok=True)
             for i in range(segment_count):
@@ -180,34 +177,32 @@ class PAGEVIDEO(QWidget):
                     list_video_split.append(output_path)
             video.release()
             return list_video_split
-    
-    def show_dialog_camera(self):
-        dialog = MyDialog()
-        result = dialog.exec_()  
-        if result == QDialog.Accepted:
-            path_camera = dialog.text_edit.text()
-            if path_camera not in self.list_camera:
-                self.list_camera.append(path_camera)
-                self.init_camera()
-            else:
-                 QMessageBox.warning(self, "Camera đã được thêm", "Camera đã được thêm", QMessageBox.Ok)
+
             
     def show_dialog_video(self):
+        # if len(self.list_camera_screen) > 0:
+        #     for path_camera in reversed(self.list_camera):
+        #          self.list_camera_screen[path_camera].stop_camera()
+        self.list_camera = [] 
+
         file_dialog = QFileDialog()
         file_dialog.setNameFilter("Video files (*.mp4 *.avi *.mov)")
         file_dialog.setFileMode(QFileDialog.ExistingFile)
         file_dialog.setViewMode(QFileDialog.Detail)
-
+        list_video_split = []
         if file_dialog.exec_():
             self.file_path = file_dialog.selectedFiles()
             if self.file_path and self.file_path != "":
                 add_video_service(self.file_path[0])
                 print("Selected file:", self.file_path[0])
-                # self.list_camera.append(file_path[0])
-                list_video_split = self.split_video(self.file_path[0])
-                for path in list_video_split:
-                    self.list_camera.append(path)
-                self.init_camera()
+                # list_video_split = self.split_video(self.file_path[0])
+                list_video_split.append(self.file_path[0])
+                for index, path in enumerate(list_video_split):
+                    self.list_camera_screen[index].path = path
+                    self.list_camera_screen[index].path_origin = self.file_path[0]
+                    self.list_camera_screen[index].start_camera()
+                    self.list_camera.append(str(index))
+                
        
 
             

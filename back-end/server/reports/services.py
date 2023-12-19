@@ -97,14 +97,14 @@ def get_videos_path_db(page_num, page_size, start_time, end_time):
   finally:
     session.close()
 
-def add_report_service(path_video, person_name, age, gender, mask, code_color, time, images_path): 
+def add_report_service(path_video, person_name, age, gender, mask, code_color, time, images_path, is_front): 
   session = db_session()
 
   try:
     video_id = session.query(Video).filter(Video.path == str(path_video)).order_by(desc(Video.time)).first().id
     
     # add report
-    report = Report(person_name, age, gender, mask, code_color, time, video_id)
+    report = Report(person_name, age, gender, mask, code_color, time, video_id, is_front)
     session.add(report)
     
     # report_id
@@ -199,7 +199,7 @@ def get_reports_service(video_id):
     session.close()
 
 
-def get_reports_db(video_id, page_num, page_size, start_time, end_time, begin_age, end_age, gender, mask):
+def get_reports_db(video_id, page_num, page_size, start_time, end_time, begin_age, end_age, gender, mask, isface):
   session = db_session()
   try:
     if start_time is None or end_time is None:
@@ -213,7 +213,8 @@ def get_reports_db(video_id, page_num, page_size, start_time, end_time, begin_ag
         Report.gender,
         Report.mask,
         Report.code_color,
-        Report.time
+        Report.time,
+        Report.isface
       ).filter(and_(
         Report.video_id == video_id,
         Report.time >= start_time,
@@ -227,6 +228,10 @@ def get_reports_db(video_id, page_num, page_size, start_time, end_time, begin_ag
         or_(
           Report.mask == mask,
           mask is None
+        ),
+        or_(
+          Report.isface == isface,
+          isface is None
         )
       ))
 

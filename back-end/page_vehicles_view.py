@@ -3,9 +3,11 @@ import math
 import os
 import threading
 from PySide2.QtCore import (QSize,QThreadPool)
+from PySide2.QtGui import (QIcon)
 
 from PySide2.QtWidgets import *
-from controller.Face_recognition.subCameraAnalyze import CameraWidget
+from server.reports.services import add_video_service
+from controller.Face_recognition.subVehiclesAnalyze import CameraWidget
 import cv2
 import moviepy.editor as mp
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
@@ -13,7 +15,7 @@ from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 class MyDialog(QDialog):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Thêm camera")
+        self.setWindowTitle("Thêm video")
         self.setMinimumSize(QSize(300, 150))
         self.setMaximumSize(QSize(1000, 500))
 
@@ -68,16 +70,17 @@ class MyDialog(QDialog):
             "}"
         )
 
-class PAGECAMERA(QWidget):
+class PAGEVEHICLE(QWidget):
     def __init__(self):
         super().__init__()
         self.new_size = 0
         self.list_camera_screen = {}
+        self.file_path = ""
         self.scroll_area = None
         self.list_camera = []
         self.thread_pool = QThreadPool()
         self.set_ui()
-        self.setObjectName(u"page_camera")
+        self.setObjectName(u"page_vehicles")
     def set_ui(self):
         self.main_layout = QHBoxLayout(self)
         self.control_layout = QVBoxLayout()
@@ -88,15 +91,16 @@ class PAGECAMERA(QWidget):
         self.list_camera_layout = {}
         self.list_close_button = {}
        
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        scroll_content = QWidget()
-        self.ref_layout = QVBoxLayout(scroll_content)
+        # self.scroll_area = QScrollArea()
+        # self.scroll_area.setWidgetResizable(True)
+        # scroll_content = QWidget()
+        # self.ref_layout = QVBoxLayout(scroll_content)
          # Set the content widget for the scroll area
-        self.scroll_area.setWidget(scroll_content)
-        # Add camera button
-        self.add_camera_button = QPushButton("Add Camera")
-        self.add_camera_button.setStyleSheet(u"QPushButton {\n"
+        # self.scroll_area.setWidget(scroll_content)
+    
+        # Add video button
+        self.add_video_button = QPushButton("Add Video")
+        self.add_video_button.setStyleSheet(u"QPushButton {\n"
                 "	border: 2px solid rgb(27, 29, 35);\n"
                 "	border-radius: 5px;	\n"
                 "	background-color: rgb(27, 29, 35);\n"
@@ -109,14 +113,17 @@ class PAGECAMERA(QWidget):
                 "	background-color: rgb(35, 40, 49);\n"
                 "	border: 2px solid rgb(43, 50, 61);\n"
                 "}")
-        self.add_camera_button.clicked.connect(self.show_dialog_camera)
-        self.add_button_layout.addWidget(self.add_camera_button)
+        icon3 = QIcon()
+        icon3.addFile(u":/16x16/icons/16x16/cil-folder-open.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.add_video_button.setIcon(icon3)
+        self.add_video_button.clicked.connect(self.show_dialog_video)
+        self.add_button_layout.addWidget(self.add_video_button)
 
         # Thêm grid_layout và QScrollArea vào main_layout
         self.control_layout.addLayout(self.grid_layout)
         self.control_layout.addLayout(self.add_button_layout)
         self.main_layout.addLayout( self.control_layout)
-        self.main_layout.addWidget(self.scroll_area)
+        # self.main_layout.addWidget(self.scroll_area)
 
     def init_camera(self):
         if len(self.list_camera) >4 :
@@ -128,20 +135,49 @@ class PAGECAMERA(QWidget):
         self.thread_pool.setMaxThreadCount(len(self.list_camera))
         for i,path in enumerate(self.list_camera):
             if path not in self.list_camera_screen.keys():
-                camera_widget = CameraWidget(path, i + 1, self)
+                camera_widget = CameraWidget(path, i + 1,self.file_path ,self)
                 self.grid_layout.addWidget(camera_widget, i // num_col, i % num_col, 1, 1)
                 self.list_camera_screen[path] = camera_widget
     
-            
+  
     def resizeEvent(self, event):
         # Override the resizeEvent to handle window resize
         self.new_size = event.size()
-        self.scroll_area.setFixedSize(int(self.new_size.width()/10* 2), self.new_size.height())
-        self.add_camera_button.setFixedSize(int(self.new_size.width()/10* 2), 50)
+        self.add_video_button.setFixedSize(int(self.new_size.width()/10* 2), 50)
 
         # Call the base class implementation
         super().resizeEvent(event)
 
+    def split_video(self,input_path):
+            list_video_split = []
+            video = cv2.VideoCapture(input_path)
+
+            dir_folder = os.path.dirname(input_path)
+            name_video = os.path.basename(input_path).split(".")[0]
+            output_folder = os.path.join(dir_folder, f"output_{name_video}")
+            
+            if not video.isOpened():
+                    raise Exception("Không thể mở file video.")
+
+            clip = mp.VideoFileClip(input_path)
+            clip_duration = clip.duration
+            
+            segment_duration = int(clip_duration/4)
+            
+            # segment_count = math.ceil(clip_duration / segment_duration)
+            segment_count = 4
+            remainder = clip_duration % segment_duration
+            os.makedirs(output_folder, exist_ok=True)
+            for i in range(segment_count):
+                    start_time = i * segment_duration
+                    last_segment_duration = segment_duration if i < segment_count - 1 else remainder+segment_duration
+                    end_time = start_time + last_segment_duration
+                    output_path = os.path.join(output_folder, f"segment_{i+1}.mp4")
+                    if not os.path.exists(output_path):    
+                            ffmpeg_extract_subclip(input_path, start_time, end_time, targetname=output_path)
+                    list_video_split.append(output_path)
+            video.release()
+            return list_video_split
     
     def show_dialog_camera(self):
         dialog = MyDialog()
@@ -153,6 +189,27 @@ class PAGECAMERA(QWidget):
                 self.init_camera()
             else:
                  QMessageBox.warning(self, "Camera đã được thêm", "Camera đã được thêm", QMessageBox.Ok)
+            
+    def show_dialog_video(self):
+        if len(self.list_camera_screen) > 0:
+             for camera_widget in self.list_camera_screen.values():
+                 camera_widget.stop_camera()
+
+        file_dialog = QFileDialog()
+        file_dialog.setNameFilter("Video files (*.mp4 *.avi *.mov)")
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setViewMode(QFileDialog.Detail)
+
+        if file_dialog.exec_():
+            self.file_path = file_dialog.selectedFiles()
+            if self.file_path and self.file_path != "":
+                add_video_service(self.file_path[0])
+                print("Selected file:", self.file_path[0])
+                # self.list_camera.append(file_path[0])
+                list_video_split = self.split_video(self.file_path[0])
+                for path in list_video_split:
+                    self.list_camera.append(path)
+                self.init_camera()
        
 
             

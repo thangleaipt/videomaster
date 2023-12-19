@@ -24,7 +24,10 @@ class PersonModel:
         self.average_age = None  
         self.average_gender = None  
         self.color_clothes = []
-        self.list_image_path = None
+        self.list_image_path = []
+        self.face_image = None
+        self.person_image = None
+        self.is_front = 0
         self.list_feature = []
         self.score_face = 0
 

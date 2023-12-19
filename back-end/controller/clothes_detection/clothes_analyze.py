@@ -74,8 +74,8 @@ class CLOTHESANALYZE():
                                 main_color = self.find_main_rgb_from_roi(img_sub)
                             else:
                                 main_color = None
-            if main_color is not None:
-                name = self.min_color_diff(main_color)       
+            # if main_color is not None:
+            #     name = self.min_color_diff(main_color)       
             return main_color,name
         except Exception as e:
             print("[clothes_analyze][clothes_detector]: ", e)

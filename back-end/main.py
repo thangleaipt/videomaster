@@ -97,6 +97,10 @@ class MainWindow(QMainWindow):
         UIFunctions.removeTitleBar(True)
         ## ==> END ##
 
+        # SET ICON ==>
+        UIFunctions.userIcon(self, "WM", r"icons\img\photo_2023-12-06_16-22-01.jpg", True)
+        ## ==> END ##
+
         ## SET ==> WINDOW TITLE
         self.setWindowTitle('HumanMaster')
         UIFunctions.labelTitle(self, 'HumanMaster')
@@ -116,20 +120,20 @@ class MainWindow(QMainWindow):
         ## ==> ADD CUSTOM MENUS
         self.ui.stackedWidget.setMinimumWidth(30)
         # UIFunctions.addNewMenu(self, "CAMERA", "btn_camera", "url(:/16x16/icons/16x16/cil-camera.png)", True)
-        UIFunctions.addNewMenu(self, "VIDEO", "btn_video", "url(:/16x16/icons/16x16/cil-movie.png)", True)
-        # UIFunctions.addNewMenu(self, "IMAGE", "btn_image", "url(:/16x16/icons/16x16/cil-image1.png)", True)
-        # UIFunctions.addNewMenu(self, "SIMILARITY", "btn_similarity", "url(:/16x16/icons/16x16/cil-people.png)", True)
+        UIFunctions.addNewMenu(self, "HUMAN", "btn_human", "url(:/16x16/icons/16x16/cil-movie.png)", True)
+        UIFunctions.addNewMenu(self, "VEHICLES", "btn_vehicles", "url(:/16x16/icons/16x16/cil-movie.png)", True)
+        # UIFunctions.addNewMenu(self, "TẠO MỚI", "btn_create", "url(:/16x16/icons/16x16/cil-people.png)", True)
         UIFunctions.addNewMenu(self, "USER", "btn_new_user", "url(:/16x16/icons/16x16/cil-user-follow.png)", True)
         UIFunctions.addNewMenu(self, "REPORT", "btn_widgets", "url(:/16x16/icons/16x16/cil-equalizer.png)", False)
         # UIFunctions.addNewMenu(self, "REPORT", "btn_report", "url(:/16x16/icons/16x16/cil-chart-pie.png)", False)
         ## ==> END ##
 
         # START MENU => SELECTION
-        UIFunctions.selectStandardMenu(self, "btn_video")
+        UIFunctions.selectStandardMenu(self, "btn_human")
         ## ==> END ##
 
         ## ==> START PAGE
-        self.ui.stackedWidget.setCurrentWidget(self.ui.page_video)
+        self.ui.stackedWidget.setCurrentWidget(self.ui.page_human)
         ## ==> END ##
 
         ## USER ICON ==> SHOW HIDE
@@ -201,31 +205,25 @@ class MainWindow(QMainWindow):
         # GET BT CLICKED
         btnWidget = self.sender()
 
-        # PAGE HOME
-        # if btnWidget.objectName() == "btn_camera":
-        #     self.ui.stackedWidget.setCurrentWidget(self.ui.page_camera)
-        #     UIFunctions.resetStyle(self, "btn_camera")
-        #     UIFunctions.labelPage(self, "camera")
-        #     btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
-
-        if btnWidget.objectName() == "btn_video":
-            self.ui.stackedWidget.setCurrentWidget(self.ui.page_video)
-            UIFunctions.resetStyle(self, "btn_video")
-            UIFunctions.labelPage(self, "video")
+        if btnWidget.objectName() == "btn_human":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.page_human)
+            UIFunctions.resetStyle(self, "btn_human")
+            UIFunctions.labelPage(self, "human")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-        # if btnWidget.objectName() == "btn_image":
-        #     self.ui.stackedWidget.setCurrentWidget(self.ui.page_image)
-        #     UIFunctions.resetStyle(self, "btn_image")
-        #     UIFunctions.labelPage(self, "image")
-        #     btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+        if btnWidget.objectName() == "btn_vehicles":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.page_vehicles)
+            UIFunctions.resetStyle(self, "btn_vehicles")
+            UIFunctions.labelPage(self, "vehicles")
+            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # if btnWidget.objectName() == "btn_similarity":
         #     self.ui.stackedWidget.setCurrentWidget(self.ui.page_similarity)
         #     UIFunctions.resetStyle(self, "btn_similarity")
         #     UIFunctions.labelPage(self, "similarity")
         #     btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
-
+    
+        
         # PAGE NEW USER
         if btnWidget.objectName() == "btn_new_user":
             self.ui.stackedWidget.setCurrentWidget(self.ui.add_user)
@@ -289,7 +287,6 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         QCoreApplication.quit()  # Tắt ứng dụng
         event.accept()
-
 
 def init_app():
     app = QApplication(sys.argv)

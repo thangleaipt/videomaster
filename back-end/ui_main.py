@@ -20,12 +20,10 @@ from PySide2.QtGui import (QBrush, QColor,  QFont, QIcon, QPalette)
 
 from PySide2.QtWidgets import *
 
-from page_similarity_view import PAGESIMILARITY
-from page_image_view import PAGEIMAGE
 from page_add_user_view import PAGEADDUSER
 from page_widget_view import PAGEWIDGET
-from page_camera_view import PAGECAMERA
-from page_video_view import PAGEVIDEO
+from page_human_view import PAGEHUMAN
+from page_vehicles_view import PAGEVEHICLE
 import cv2
 from controller.Face_recognition.analyze_video_insightface import FaceAnalysisInsightFace
 
@@ -38,6 +36,9 @@ class Ui_MainWindow(object):
         if MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1000, 720)
+        icon = QIcon()
+        icon.addFile(r"icons\img\photo_2023-12-06_16-22-01.jpg", QSize(), QIcon.Normal, QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         MainWindow.setMinimumSize(QSize(1000, 720))
         palette = QPalette()
         brush = QBrush(QColor(255, 255, 255, 255))
@@ -702,21 +703,14 @@ class Ui_MainWindow(object):
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setStyleSheet(u"background: transparent;")
         self.analyzer = FaceAnalysisInsightFace()
-        self.page_camera = PAGECAMERA()
-        self.stackedWidget.addWidget(self.page_camera)
 
-        self.page_video = PAGEVIDEO()
-        self.stackedWidget.addWidget(self.page_video)
+        self.page_human = PAGEHUMAN()
+        self.stackedWidget.addWidget(self.page_human)
 
-        self.page_image = PAGEIMAGE()
-        self.page_image.analyzer = self.analyzer
-        self.stackedWidget.addWidget(self.page_image)
+        self.page_vehicles = PAGEVEHICLE()
+        self.stackedWidget.addWidget(self.page_vehicles)
 
-        self.page_similarity = PAGESIMILARITY()
-        self.page_similarity.analyzer = self.analyzer
-        self.stackedWidget.addWidget(self.page_similarity)
-        
-        self.add_user = PAGEADDUSER(self.page_video, self.page_image)
+        self.add_user = PAGEADDUSER(self.page_human, self.page_vehicles)
         self.add_user.analyzer = self.analyzer
 
         self.add_user.set_ui()
