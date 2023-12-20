@@ -128,8 +128,8 @@ class PAGEHUMAN(QWidget):
         self.control_layout.addLayout(self.add_button_layout)
         self.main_layout.addLayout( self.control_layout)
         # self.main_layout.addWidget(self.scroll_area)
-        loading_screen = LoadingScreen(self.thread_pool)
-        loading_screen.show()
+        # loading_screen = LoadingScreen(self.thread_pool)
+        # loading_screen.show()
         self.init_camera()
 
     def init_camera(self):
