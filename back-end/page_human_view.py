@@ -14,7 +14,7 @@ import moviepy.editor as mp
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 
-segment_count = 4
+segment_count = 8
 
 class MyDialog(QDialog):
     def __init__(self):
@@ -166,7 +166,7 @@ class PAGEHUMAN(QWidget):
             clip = mp.VideoFileClip(input_path)
             clip_duration = clip.duration
             
-            segment_duration = int(clip_duration/4)
+            segment_duration = int(clip_duration/segment_count)
             
             remainder = clip_duration % segment_duration
             os.makedirs(output_folder, exist_ok=True)
