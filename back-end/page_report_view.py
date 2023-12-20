@@ -503,7 +503,9 @@ class PAGEREPORT(QDialog):
                         isface = 0
                 else:
                         isface = None
+                print("Get Report db")
                 self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
+                print(f"Length: {len(self.list_reports)}")
                 self.list_reports_filter = self.list_reports
 
         def filter_report(self):
