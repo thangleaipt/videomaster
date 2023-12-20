@@ -523,7 +523,7 @@ class PAGEREPORT(QDialog):
                 return dt_vietnam_str
 
         def fill_report(self):
-                
+                time.sleep(0.1)
                 if len(self.list_reports_filter) >= 16:
                         self.tableWidget.setRowCount(len(self.list_reports_filter))
                 else:
