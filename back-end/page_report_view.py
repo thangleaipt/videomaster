@@ -509,7 +509,6 @@ class PAGEREPORT(QDialog):
         def filter_report(self):
                 loading_screen = LoadingScreen(self)
                 loading_screen.filter_loading()
-                self.fill_report()
 
         def convert_timestamp_to_datetime(self,timestamp):
                 dt_utc = datetime.utcfromtimestamp(timestamp)
@@ -523,7 +522,6 @@ class PAGEREPORT(QDialog):
                 return dt_vietnam_str
 
         def fill_report(self):
-                time.sleep(0.1)
                 if len(self.list_reports_filter) >= 16:
                         self.tableWidget.setRowCount(len(self.list_reports_filter))
                 else:
@@ -633,7 +631,6 @@ class PAGEREPORT(QDialog):
                         if len(self.list_file_path) > 0:
                                 loading_screen = LoadingScreen(self)
                                 loading_screen.import_loading()
-                                self.fill_report()
 
         def filter_report_query(self):
                 for file_path in self.list_file_path:

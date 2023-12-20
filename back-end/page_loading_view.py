@@ -68,4 +68,5 @@ class LoadingScreen(QMainWindow):
 
     def loading_finished(self):
         self.close()
+        self.report.fill_report()
 
