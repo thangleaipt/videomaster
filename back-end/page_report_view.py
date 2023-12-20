@@ -91,7 +91,7 @@ class PAGEIMAGEVIEW(QDialog):
                 img = cv2.imread(image_paths[0])
                 height, width = img.shape[:2]
 
-                video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'XVID'), frame_rate, (width, height))
+                video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), frame_rate, (width, height))
 
                 for image_path in image_paths:
                         img = cv2.imread(image_path)
