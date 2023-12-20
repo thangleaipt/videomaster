@@ -21,6 +21,7 @@ class FilterThread(QThread):
 
     def run(self):
         self.report.get_list_report()
+        self.report.fill_report()
         self.finished.emit()
 
 class ImportThread(QThread):
@@ -32,6 +33,7 @@ class ImportThread(QThread):
 
     def run(self):
         self.report.filter_report_query()
+        self.report.fill_report()
         self.finished.emit()
 
 class LoadingScreen(QMainWindow):
@@ -67,7 +69,6 @@ class LoadingScreen(QMainWindow):
         self.loading_thread.start()
 
     def loading_finished(self):
-        self.report.fill_report()
         self.close()
         self.report.show()
 

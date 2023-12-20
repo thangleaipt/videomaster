@@ -624,10 +624,6 @@ class PAGEREPORT(QDialog):
                 file_dialog.setFileMode(QFileDialog.ExistingFiles)
                 file_dialog.setViewMode(QFileDialog.Detail)
 
-                self.list_reports_filter = []
-                max_report = None
-                min_report = None
-
                 if file_dialog.exec_():
                         self.list_file_path = file_dialog.selectedFiles()
                         if len(self.list_file_path) > 0:
@@ -638,6 +634,9 @@ class PAGEREPORT(QDialog):
                 for file_path in self.list_file_path:
                         print("Selected file:", file_path)
                         frame_import = cv2.imread(file_path)
+                        max_report = None
+                        min_report = None
+                        self.list_reports_filter = []
                         list_instance = self.analyzer.analyze_detect_face(frame_import)
 
                         if len(list_instance) > 0 and list_instance[0][1] is not None:
