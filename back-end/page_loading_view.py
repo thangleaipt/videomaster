@@ -19,9 +19,8 @@ class FilterThread(QThread):
 
     def run(self):
         self.report.get_list_report()
-        self.finished.emit()
-        time.sleep(0.5)
         self.fill_report()
+        self.finished.emit()
     
     def fill_report(self):
                 if len(self.report.list_reports_filter) >= 16:
@@ -97,9 +96,9 @@ class ImportThread(QThread):
         self.report = parent
 
     def run(self):
-        self.finished.emit()
         self.report.filter_report_query()
         self.fill_report()
+        self.finished.emit()
 
     def fill_report(self):
                 if len(self.report.list_reports_filter) >= 16:
