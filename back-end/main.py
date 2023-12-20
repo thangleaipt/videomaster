@@ -24,6 +24,7 @@ from ui_Formlogin import Login
 # GUI FILE
 from app_modules import *
 
+
 class LoginWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
@@ -77,9 +78,10 @@ class LoginWindow(QMainWindow):
     def click_login(self):
         print("click button login")
         # Hide login
-        self.hide()
+        self.close()
         window = MainWindow()
-        window.show()
+        # window.show()
+        
 
     def mousePressEvent(self, event):
         self.drag_pos = event.globalPos()
@@ -285,6 +287,7 @@ class MainWindow(QMainWindow):
     ## END ==> APP EVENTS
     ############################## ---/--/--- ##############################
     def closeEvent(self, event):
+        self.close()
         QCoreApplication.quit()  # Tắt ứng dụng
         event.accept()
 
@@ -295,6 +298,8 @@ def init_app():
     # window = MainWindow()
     # window.show()
     login_window = LoginWindow()
+    # loading  = LoadingScreen()
+    # loading.show()
     sys.exit(app.exec_())
 
 if __name__ == "__main__":

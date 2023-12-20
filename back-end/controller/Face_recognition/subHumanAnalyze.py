@@ -49,7 +49,7 @@ class SubVideoAnalyze(QRunnable):
         self.video_path = video_path
         self.video_path_report = video_path
         if 'segment' in video_path:
-            self.video_path_report = path_origin[0]
+            self.video_path_report = path_origin
 
         self.signals = CameraWorkerSignals()
         if type(self.video_path) == str:
@@ -109,7 +109,7 @@ class SubVideoAnalyze(QRunnable):
                     percent = round((self.index_frame / self.frame_count), 2)*100
                     
                     # self.output_video.write(img0)
-                    self.signals.result.emit(image)
+                    self.signals.result.emit(percent)
                     # self.signals.updateUI.emit(self.list_image_label)
 
             else:
@@ -607,16 +607,16 @@ class CameraWidget(QWidget):
         if frame is None:
             self.camera_label.setText("No frame")
             return
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        h, w, ch = frame.shape
-        bytes_per_line = ch * w
-        q_image = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(q_image)
-        scaled_pixmap = pixmap.scaled(self.camera_label.size(), Qt.KeepAspectRatio)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # h, w, ch = frame.shape
+        # bytes_per_line = ch * w
+        # q_image = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        # pixmap = QPixmap.fromImage(q_image)
+        # scaled_pixmap = pixmap.scaled(self.camera_label.size(), Qt.KeepAspectRatio)
         # check camera_label attribute camerawidget
         if self.camera_label:
-            self.camera_label.setPixmap(scaled_pixmap)
-            # self.camera_label.setText(f"Percent: {frame}%")
+            # self.camera_label.setPixmap(scaled_pixmap)
+            self.camera_label.setText(f"Percent: {frame}%")
 
     # def update_ui(self, list_image_label):
     #     try:

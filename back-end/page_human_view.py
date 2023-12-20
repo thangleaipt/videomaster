@@ -12,6 +12,7 @@ from controller.Face_recognition.subHumanAnalyze import CameraWidget
 import cv2
 import moviepy.editor as mp
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+from page_loading_view import LoadingScreen
 
 segment_count = 4
 
@@ -127,6 +128,8 @@ class PAGEHUMAN(QWidget):
         self.control_layout.addLayout(self.add_button_layout)
         self.main_layout.addLayout( self.control_layout)
         # self.main_layout.addWidget(self.scroll_area)
+        loading_screen = LoadingScreen(self.thread_pool)
+        loading_screen.show()
         self.init_camera()
 
     def init_camera(self):
@@ -195,8 +198,8 @@ class PAGEHUMAN(QWidget):
             if self.file_path and self.file_path != "":
                 add_video_service(self.file_path[0])
                 print("Selected file:", self.file_path[0])
-                # list_video_split = self.split_video(self.file_path[0])
-                list_video_split.append(self.file_path[0])
+                list_video_split = self.split_video(self.file_path[0])
+                # list_video_split.append(self.file_path[0])
                 for index, path in enumerate(list_video_split):
                     self.list_camera_screen[index].path = path
                     self.list_camera_screen[index].path_origin = self.file_path[0]

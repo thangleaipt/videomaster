@@ -101,6 +101,7 @@ def add_report_service(path_video, person_name, age, gender, mask, code_color, t
   session = db_session()
 
   try:
+    print(f"Path video: {path_video}")
     video_id = session.query(Video).filter(Video.path == str(path_video)).order_by(desc(Video.time)).first().id
     
     # add report
