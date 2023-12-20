@@ -107,6 +107,7 @@ class PAGEREPORT(QDialog):
                 super().__init__()
                 self.list_reports_filter = []
                 self.list_file_path = []
+                self.counter = 0
                 self.video_id = index
                 self.time = time
                 self.analyzer = analyzer
@@ -503,9 +504,8 @@ class PAGEREPORT(QDialog):
                         isface = 0
                 else:
                         isface = None
-                print("Get Report db")
                 self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
-                print(f"Length: {len(self.list_reports)}")
+                print(f"Length list_reports: {len(self.list_reports)}")
                 self.list_reports_filter = self.list_reports
 
         def filter_report(self):
@@ -536,8 +536,8 @@ class PAGEREPORT(QDialog):
                 column_widths = [int(ratio * screen_width) for ratio in column_ratios]
                 for i in range(8):
                         self.tableWidget.setColumnWidth(i, column_widths[i])
-
                 for i, report in enumerate(self.list_reports_filter):
+                        self.counter = round(i / len(self.list_reports_filter) * 100)
                         self.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
                         if 'random' in report['person_name']:
                                 name = "Người lạ"
