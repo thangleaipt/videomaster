@@ -31,7 +31,7 @@ class ImportThread(QThread):
         self.report = parent
 
     def run(self):
-        self.report.get_list_report()
+        self.report.filter_report_query()
         self.finished.emit()
 
 class LoadingScreen(QMainWindow):

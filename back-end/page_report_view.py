@@ -106,6 +106,7 @@ class PAGEREPORT(QDialog):
         def __init__(self, index, time, analyzer):
                 super().__init__()
                 self.list_reports_filter = []
+                self.list_file_path = []
                 self.video_id = index
                 self.time = time
                 self.analyzer = analyzer
@@ -507,7 +508,7 @@ class PAGEREPORT(QDialog):
 
         def filter_report(self):
                 loading_screen = LoadingScreen(self)
-                loading_screen.start_loading()
+                loading_screen.filter_loading()
                 self.fill_report()
 
         def convert_timestamp_to_datetime(self,timestamp):
@@ -628,62 +629,66 @@ class PAGEREPORT(QDialog):
                 min_report = None
 
                 if file_dialog.exec_():
-                        list_file_path = file_dialog.selectedFiles()
-                        if list_file_path:
-                                for file_path in list_file_path:
-                                        print("Selected file:", file_path)
-                                        frame_import = cv2.imread(file_path)
-                                        list_instance = self.analyzer.analyze_detect_face(frame_import)
-
-                                        if len(list_instance) > 0 and list_instance[0][1] is not None:
-                                                for report in self.list_reports:
-                                                        if unidecode(report['person_name']).lower() == unidecode(list_instance[0][1]).lower():
-                                                                self.list_reports_filter.append(report)
-                                        # Unknown person and have face
-                                        elif len(list_instance) > 0 and list_instance[0][1] is None: 
-                                                feature_image_import = self.analyzer.get_feature(frame_import)[0]
-                                                for report in self.list_reports:
-                                                        list_path_image = []
-                                                        list_class_image = report['images']
-                                                        for image in list_class_image:
-                                                                list_path_image.append(image['path'])
-                                                        for path_image in list_path_image:
-                                                                frame_ref = cv2.imread(path_image)
-                                                                feature_ref = self.analyzer.get_feature(frame_ref)
-                                                                if len(feature_ref) > 0:
-                                                                        similarity = self.analyzer.rec.compute_sim(feature_image_import, feature_ref[0])
-                                                                else:
-                                                                        similarity = 0
-                                                                if similarity > 0.43:
-                                                                        max_report = report
-                                                                        break
-                                                                
-                                                        if max_report is not None and max_report not in self.list_reports_filter:             
-                                                                self.list_reports_filter.append(max_report)
-                                        elif len(list_instance) == 0:
-                                                h_import,w1_import,_ = frame_import.shape
-                                                xyxys_import =  np.array([[0,0,w1_import,h_import]])
-                                                feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
-                                                for report in self.list_reports:
-                                                        list_path_image = []
-                                                        list_class_image = report['images']
-                                                        for image in list_class_image:
-                                                                list_path_image.append(image['path'])
-                                                        for path_image in list_path_image:
-                                                                frame_ref = cv2.imread(path_image)
-                                                                results = model(frame_ref,classes=[0],conf=0.4,verbose=False)
-                                                                pred_boxes = results[0].boxes
-                                                                for pred in pred_boxes:
-                                                                        box = pred.xyxy.squeeze().tolist()
-                                                                        xyxys_ref =  np.array([[box[0],box[1],box[2],box[3]]])
-                                                                        feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
-                                                                        dist = self._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
-                                                                        if dist < 0.25:
-                                                                                min_report = report
-                                                                        
-                                                        if min_report is not None and min_report not in self.list_reports_filter:             
-                                                                self.list_reports_filter.append(min_report)
+                        self.list_file_path = file_dialog.selectedFiles()
+                        if len(self.list_file_path) > 0:
+                                loading_screen = LoadingScreen(self)
+                                loading_screen.import_loading()
                                 self.fill_report()
+
+        def filter_report_query(self):
+                for file_path in self.list_file_path:
+                        print("Selected file:", file_path)
+                        frame_import = cv2.imread(file_path)
+                        list_instance = self.analyzer.analyze_detect_face(frame_import)
+
+                        if len(list_instance) > 0 and list_instance[0][1] is not None:
+                                for report in self.list_reports:
+                                        if unidecode(report['person_name']).lower() == unidecode(list_instance[0][1]).lower():
+                                                self.list_reports_filter.append(report)
+                        # Unknown person and have face
+                        elif len(list_instance) > 0 and list_instance[0][1] is None: 
+                                feature_image_import = self.analyzer.get_feature(frame_import)[0]
+                                for report in self.list_reports:
+                                        list_path_image = []
+                                        list_class_image = report['images']
+                                        for image in list_class_image:
+                                                list_path_image.append(image['path'])
+                                        for path_image in list_path_image:
+                                                frame_ref = cv2.imread(path_image)
+                                                feature_ref = self.analyzer.get_feature(frame_ref)
+                                                if len(feature_ref) > 0:
+                                                        similarity = self.analyzer.rec.compute_sim(feature_image_import, feature_ref[0])
+                                                else:
+                                                        similarity = 0
+                                                if similarity > 0.43:
+                                                        max_report = report
+                                                        break
+                                                
+                                        if max_report is not None and max_report not in self.list_reports_filter:             
+                                                self.list_reports_filter.append(max_report)
+                        elif len(list_instance) == 0:
+                                h_import,w1_import,_ = frame_import.shape
+                                xyxys_import =  np.array([[0,0,w1_import,h_import]])
+                                feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
+                                for report in self.list_reports:
+                                        list_path_image = []
+                                        list_class_image = report['images']
+                                        for image in list_class_image:
+                                                list_path_image.append(image['path'])
+                                        for path_image in list_path_image:
+                                                frame_ref = cv2.imread(path_image)
+                                                results = model(frame_ref,classes=[0],conf=0.4,verbose=False)
+                                                pred_boxes = results[0].boxes
+                                                for pred in pred_boxes:
+                                                        box = pred.xyxy.squeeze().tolist()
+                                                        xyxys_ref =  np.array([[box[0],box[1],box[2],box[3]]])
+                                                        feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
+                                                        dist = self._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
+                                                        if dist < 0.25:
+                                                                min_report = report
+                                                        
+                                        if min_report is not None and min_report not in self.list_reports_filter:             
+                                                self.list_reports_filter.append(min_report)
 
         def create_pdf_report(self):
                 file_path = f"output_{self.video_id}_{time.strftime('%Y%m%d%H%M%S')}.pdf"
