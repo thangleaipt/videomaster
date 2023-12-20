@@ -113,22 +113,15 @@ class SubVideoAnalyze(QRunnable):
                     # self.signals.updateUI.emit(self.list_image_label)
 
             else:
-                if not isinstance(self.video_path, int) and 'rtsp' not in self.video_path:
-                    self.signals.result.emit(None)
-                    print(f"{self.video_path} DONE")
-                    # self.signals.finished.emit()
-                    self.stop()
-                    return
-                else:
-                    self.video_capture.release()
-                    self.video_capture = cv2.VideoCapture(self.video_path)
-                    self.index_frame = 0
-                    print(f"{self.video_path} RESTART")
+                self.signals.result.emit(None)
+                print(f"{self.video_path} DONE")
+                # self.signals.finished.emit()
+                self.stop()
+                return
 
     def stop(self):
         if self.video_capture is not None:
             # self.thread_greeting.is_alive = False
-            del self.face_analyzer
             self.is_running = False
             self.video_capture.release()
             self.video_capture = None

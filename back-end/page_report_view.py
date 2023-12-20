@@ -27,6 +27,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from page_loading_view import LoadingScreen
 
 
 column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
@@ -236,7 +237,7 @@ class PAGEREPORT(QDialog):
                 icon3 = QIcon()
                 icon3.addFile(u":/16x16/icons/16x16/cil-magnifying-glass.png", QSize(), QIcon.Normal, QIcon.Off)
                 self.search_button.setIcon(icon3)
-                self.search_button.clicked.connect(self.get_list_report)
+                self.search_button.clicked.connect(self.filter_report)
 
                  # Buton Search
                 self.import_button = QPushButton("Lọc ảnh", self.filter_groupbox)
@@ -461,7 +462,7 @@ class PAGEREPORT(QDialog):
                         ___qtablewidgetitem7 = self.tableWidget.horizontalHeaderItem(7)
                         ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"Ảnh", None));
 
-                        self.get_list_report()
+                        self.filter_report()
 
         def get_list_report(self):
                 # Get the Unix timestamp from self.dateTimeEdit_start
@@ -503,6 +504,10 @@ class PAGEREPORT(QDialog):
                         isface = None
                 self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
                 self.list_reports_filter = self.list_reports
+
+        def filter_report(self):
+                loading_screen = LoadingScreen(self)
+                loading_screen.start_loading()
                 self.fill_report()
 
         def convert_timestamp_to_datetime(self,timestamp):

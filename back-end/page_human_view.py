@@ -12,7 +12,7 @@ from controller.Face_recognition.subHumanAnalyze import CameraWidget
 import cv2
 import moviepy.editor as mp
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
-from page_loading_view import LoadingScreen
+
 
 segment_count = 4
 
