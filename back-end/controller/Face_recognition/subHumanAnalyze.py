@@ -54,12 +54,9 @@ class SubVideoAnalyze(QRunnable):
 
         self.signals = CameraWorkerSignals()
         if type(self.video_path) == str:
-            if 'rtsp' in self.video_path:
-                path_dir = f"{STATIC_FOLDER}\\{os.path.dirname(str(self.video_path)).replace(':', '').replace('/', '')}"
-                self.name_video = os.path.dirname(str(self.video_path)).replace(':', '').replace('/', '')
-            else:
-                self.name_video = os.path.basename(str(self.video_path))
-                path_dir = f"{STATIC_FOLDER}\\{os.path.basename(str(self.video_path))}"
+            
+            self.name_video = os.path.basename(str(self.video_path))
+            path_dir = f"{STATIC_FOLDER}\\{os.path.basename(str(self.video_path))}"
             if not os.path.exists(path_dir):
                 os.makedirs(path_dir)
         else:
@@ -418,7 +415,7 @@ class SubVideoAnalyze(QRunnable):
                     current_time_seconds = self.index_frame / self.fps
                     current_time_timedelta = timedelta(seconds=current_time_seconds)
                     formatted_time = str(current_time_timedelta)
-                    
+
                     person_model.time = datetime.now().strftime(DATETIME_FORMAT)
                     self.list_person_model.append(person_model)
                     self.list_total_id.append(guid)
