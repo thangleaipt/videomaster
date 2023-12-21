@@ -111,6 +111,12 @@ class SubVideoAnalyze(QRunnable):
                     # self.signals.updateUI.emit(self.list_image_label)
 
             else:
+                if len(self.list_person_model) > 0:
+                    print(f"Total report: {len(self.list_person_model)}")
+                    self.send_report_to_db()
+                    self.list_total_id = []
+                    self.list_person_model = []
+                    
                 self.signals.result.emit(None)
                 print(f"{self.video_path} DONE")
                 # self.signals.finished.emit()
@@ -499,13 +505,13 @@ class SubVideoAnalyze(QRunnable):
                         self.list_person_model[index].list_image_path.append(path_image)
             
             # Send data to report
-            if self.frame_count - self.index_frame < 10 and self.index_report == 0:
-                logging.info(f"[analyze_video][index_frame] Send data to report: {self.index_frame}, {len(self.list_person_model)}")
-                if len(self.list_person_model) > 0:
-                    self.send_report_to_db()
-                    self.list_total_id = []
-                    self.list_person_model = []
-                    self.index_report += 1
+            # if self.frame_count - self.index_frame < 10 and self.index_report == 0:
+            #     logging.info(f"[analyze_video][index_frame] Send data to report: {self.index_frame}, {len(self.list_person_model)}")
+            #     if len(self.list_person_model) > 0:
+            #         self.send_report_to_db()
+            #         self.list_total_id = []
+            #         self.list_person_model = []
+            #         self.index_report += 1
                 
             return frame,list_image_label
         except Exception as e:
