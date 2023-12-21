@@ -414,9 +414,11 @@ class SubVideoAnalyze(QRunnable):
 
                     cv2.imwrite(path_image, image_save)
                     person_model.list_image_path.append(path_image)
-                    current_time_seconds = index / self.fps
+
+                    current_time_seconds = self.index_frame / self.fps
                     current_time_timedelta = timedelta(seconds=current_time_seconds)
                     formatted_time = str(current_time_timedelta)
+                    
                     person_model.time = datetime.now().strftime(DATETIME_FORMAT)
                     self.list_person_model.append(person_model)
                     self.list_total_id.append(guid)
