@@ -430,6 +430,7 @@ class PAGEREPORT(QDialog):
                         self.tableWidget.verticalHeader().setStretchLastSection(True)
                         self.horizontalLayout_12.addWidget(self.tableWidget)
                         self.verticalLayout_6.addWidget(self.frame_3)
+                        self.tableWidget.cellClicked.connect(self.on_row_selected)
 
         def retranslateUi(self):
                         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)

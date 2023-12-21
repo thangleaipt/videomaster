@@ -33,6 +33,7 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QRadialGradient)
 
 from scipy.optimize import linear_sum_assignment
+from datetime import timedelta
 
 class CameraWorkerSignals(QObject):
     result = Signal(np.ndarray)
@@ -413,6 +414,9 @@ class SubVideoAnalyze(QRunnable):
 
                     cv2.imwrite(path_image, image_save)
                     person_model.list_image_path.append(path_image)
+                    current_time_seconds = index / self.fps
+                    current_time_timedelta = timedelta(seconds=current_time_seconds)
+                    formatted_time = str(current_time_timedelta)
                     person_model.time = datetime.now().strftime(DATETIME_FORMAT)
                     self.list_person_model.append(person_model)
                     self.list_total_id.append(guid)
@@ -438,12 +442,19 @@ class SubVideoAnalyze(QRunnable):
                             if len(self.list_person_model[index].list_check_masks) > 50:
                                 del self.list_person_model[index].list_check_masks[0]
                         
+                        if label_name is not None:
+                            self.list_person_model[index].label_name = label_name
+
+                        if main_color_clothes is not None:
+                            self.list_person_model[index].code_color = f"{main_color_clothes[0]},{main_color_clothes[1]},{main_color_clothes[2]}"
+                        if name_color is not None:
+                            self.list_person_model[index].name_color = name_color
+                        
                     self.list_person_model[index].counting_tracking += 1
 
                     # Send telegram
                     if (self.list_person_model[index].counting_tracking % 1 == 0 or self.list_person_model[index].counting_tracking == 1 or (self.list_person_model[index].label_name != label_name and label_name is not None)):
-                        if label_name is not None:
-                            self.list_person_model[index].label_name = label_name
+            
                         if len(self.list_person_model[index].list_gender) > 0:
                             self.list_person_model[index].average_gender = self.count_most_frequent_element(self.list_person_model[index].list_gender)
                         else:
@@ -454,11 +465,6 @@ class SubVideoAnalyze(QRunnable):
                         if len(self.list_person_model[index].list_age) > 0:
                             self.list_person_model[index].start_age = min(self.list_person_model[index].list_age)
                             self.list_person_model[index].end_age = max(self.list_person_model[index].list_age)
-
-                        if main_color_clothes is not None:
-                            self.list_person_model[index].code_color = f"{main_color_clothes[0]},{main_color_clothes[1]},{main_color_clothes[2]}"
-                        if name_color is not None:
-                            self.list_person_model[index].name_color = name_color
                         
                         if extend_face_image is not None and path_save_face_image != "":
                             if extend_face_image.shape[0] > 0 and extend_face_image.shape[1] > 0:

@@ -45,8 +45,6 @@ class FilterThread(QThread):
                 if len(self.report.list_reports_filter) >= 16:
                         self.report.tableWidget.setRowCount(len(self.report.list_reports_filter))
                 else:
-                        if len(self.report.list_reports_filter) == 0:
-                                QMessageBox.information(self.report, "Notification", "Không tìm thấy kết quả.")
                         self.report.tableWidget.setRowCount(16)
                 self.report.tableWidget.clearContents()
 
@@ -104,8 +102,6 @@ class FilterThread(QThread):
                                 self.report.tableWidget.setRowHeight(i, pixmap.height())
 
                                 self.report.tableWidget.setColumnWidth(4, pixmap.width() + 20)
-
-                self.report.tableWidget.cellClicked.connect(self.report.on_row_selected)
 
 class ImportThread(QThread):
     finished = Signal()
@@ -169,42 +165,41 @@ class ImportThread(QThread):
                                         if max_report is not None and max_report not in self.report.list_reports_filter:             
                                                 self.report.list_reports_filter.append(max_report)
                                                 print("Max report: ", max_report['person_name'])
-                        if len(list_instance) == 0 or len(self.report.list_reports_filter) > 0:
+                        if len(list_instance) == 0 or len(self.report.list_reports_filter) >= 0:
                                 h_import,w1_import,_ = frame_import.shape
                                 xyxys_import =  np.array([[0,0,w1_import,h_import]])
                                 feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
                                 for report in self.report.list_reports:
-                                        number += 1
-                                        self.counter = round(number / len(self.report.list_reports) * 100)
-                                        if len(self.report.list_reports) <number:
-                                               self.counter = 100
-                                        self.progress_update.emit(self.counter)
-                                        list_path_person_image = []
-                                        list_class_image = report['images']
-                                        for image in list_class_image:
-                                                name_image = os.path.basename(image['path'])
-                                                if "person_" in name_image:
-                                                        list_path_person_image.append(image['path'])
+                                        if report not in self.report.list_reports_filter:
+                                                number += 1
+                                                self.counter = round(number / len(self.report.list_reports) * 100)
+                                                if len(self.report.list_reports) <number:
+                                                        self.counter = 100
+                                                self.progress_update.emit(self.counter)
+                                                list_path_person_image = []
+                                                list_class_image = report['images']
+                                                for image in list_class_image:
+                                                        name_image = os.path.basename(image['path'])
+                                                        if "person_" in name_image:
+                                                                list_path_person_image.append(image['path'])
                                 
-                                        for path_image in list_path_person_image:
-                                                frame_ref = cv2.imread(path_image)
-                                                h_ref,w1_ref,_ = frame_ref.shape
-                                                xyxys_ref =  np.array([[0,0,w1_ref,h_ref]])
-                                                feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
-                                                dist = self.report._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
-                                                if dist < 0.2:
-                                                        min_report = report
-                                                        
-                                        if min_report is not None and min_report not in self.report.list_reports_filter:             
-                                                self.report.list_reports_filter.append(min_report)
-                                                print("Min report: ", min_report['person_name'])
+                                                for path_image in list_path_person_image:
+                                                        frame_ref = cv2.imread(path_image)
+                                                        h_ref,w1_ref,_ = frame_ref.shape
+                                                        xyxys_ref =  np.array([[0,0,w1_ref,h_ref]])
+                                                        feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
+                                                        dist = self.report._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
+                                                        if dist < 0.17:
+                                                                min_report = report
+                                                                
+                                                if min_report is not None and min_report not in self.report.list_reports_filter:             
+                                                        self.report.list_reports_filter.append(min_report)
+                                                        print("Min report: ", min_report['person_name'])
 
     def fill_report(self):
                 if len(self.report.list_reports_filter) >= 16:
                         self.report.tableWidget.setRowCount(len(self.report.list_reports_filter))
                 else:
-                        if len(self.report.list_reports_filter) == 0:
-                                QMessageBox.information(self.report, "Notification", "Không tìm thấy kết quả.")
                         self.report.tableWidget.setRowCount(16)
                 self.report.tableWidget.clearContents()
 
@@ -261,9 +256,6 @@ class ImportThread(QThread):
 
                                 self.report.tableWidget.setColumnWidth(4, pixmap.width() + 20)
 
-                self.report.tableWidget.cellClicked.connect(self.report.on_row_selected)
-
-        
 
 class LoadingScreen(QMainWindow):
     def __init__(self, parent=None):
