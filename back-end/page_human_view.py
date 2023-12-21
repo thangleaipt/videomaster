@@ -11,7 +11,7 @@ from controller.Face_recognition.analyze_video_insightface import FaceAnalysisIn
 from controller.Face_recognition.subHumanAnalyze import CameraWidget
 import cv2
 import moviepy.editor as mp
-from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+from controller.moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 
 segment_count = 8
