@@ -1,7 +1,5 @@
 from datetime import datetime, timezone, timedelta
-import math
 import os
-import threading
 import time
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
     QRect, QSize, QUrl, Qt, QDateTime, QTime)
@@ -12,17 +10,12 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
 from PySide2.QtWidgets import *
 from server.reports.services import get_reports_db
 import cv2
-from PyQt5.QtCore import pyqtSlot
-from unidecode import unidecode
 import numpy as np
-from controller.boxmot.trackers.strongsort.strong_sort import ReIDDetectMultiBackend
-from pathlib import Path
-import torch
+
 from config import WEIGHT_FOLDER, STATIC_FOLDER
 from PySide2.QtMultimedia import QMediaPlayer, QMediaContent
 from PySide2.QtMultimediaWidgets import QVideoWidget
 from PIL import Image
-from ultralytics import YOLO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
@@ -32,15 +25,7 @@ from page_loading_view import LoadingScreen
 
 column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
 date_time_format = "yyyy-MM-dd hh:mm:ss"
-reid = ReIDDetectMultiBackend(
-    weights=Path(os.path.join(WEIGHT_FOLDER,'osnet_ain_x1_0_msmt17.pt')),
-    device=torch.device(0)
-)
 
-device = torch.device(0)
-
-model = YOLO('models/yolov8m.pt')
-model.to(device)
 
 class PAGEIMAGEVIEW(QDialog):
         def __init__(self, list_image_path=None, video_id=None, parent=None):
@@ -509,6 +494,7 @@ class PAGEREPORT(QDialog):
                 self.list_reports_filter = self.list_reports
 
         def filter_report(self):
+                self.get_list_report()
                 loading_screen = LoadingScreen(self)
                 loading_screen.filter_loading()
 
@@ -523,70 +509,68 @@ class PAGEREPORT(QDialog):
                 
                 return dt_vietnam_str
 
-        def fill_report(self):
-                if len(self.list_reports_filter) >= 16:
-                        self.tableWidget.setRowCount(len(self.list_reports_filter))
-                else:
-                        if len(self.list_reports_filter) == 0:
-                                QMessageBox.information(self, "Notification", "Không tìm thấy kết quả.")
-                        self.tableWidget.setRowCount(16)
-                self.tableWidget.clearContents()
+        # def fill_report(self):
+        #         if len(self.list_reports_filter) >= 16:
+        #                 self.tableWidget.setRowCount(len(self.list_reports_filter))
+        #         else:
+        #                 if len(self.list_reports_filter) == 0:
+        #                         QMessageBox.information(self, "Notification", "Không tìm thấy kết quả.")
+        #                 self.tableWidget.setRowCount(16)
+        #         self.tableWidget.clearContents()
 
-                screen_width = QDesktopWidget().screenGeometry().width()
-                column_widths = [int(ratio * screen_width) for ratio in column_ratios]
-                for i in range(8):
-                        self.tableWidget.setColumnWidth(i, column_widths[i])
-                for i, report in enumerate(self.list_reports_filter):
-                        self.counter = round(i / len(self.list_reports_filter) * 100)
-                        self.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
-                        if 'random' in report['person_name']:
-                                name = "Người lạ"
-                        else:
-                                name = report['person_name']
-                        self.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
-                        self.tableWidget.setItem(i, 2, QTableWidgetItem(str(report['age'])))
-                        if report['gender'] == 1:
-                                gender = "Nam"
-                        elif report['gender'] == 0:
-                                gender = "Nữ"
-                        else:
-                                gender = "Không xác định"
-                        self.tableWidget.setItem(i, 3, QTableWidgetItem(str(gender)))
-                        if report['mask'] == 1:
-                               mask = "Có"
-                        elif report['mask'] == 0:
-                                mask = "Không"
-                        self.tableWidget.setItem(i, 4, QTableWidgetItem(str(mask)))
-                        if report['code_color'] is None:
-                                color = "Không xác định"
-                                self.tableWidget.setItem(i, 5, QTableWidgetItem(str(color)))
-                        else:
-                                color = report['code_color']
-                                numbers = [int(num) for num in color.split(',')]
-                                image_color = Image.new('RGB', (128, 128), (numbers[0], numbers[1], numbers[2]))
-                                image_pil = image_color.tobytes()
-                                q_image = QImage(image_pil, image_color.width, image_color.height, QImage.Format_RGB888)
+        #         screen_width = QDesktopWidget().screenGeometry().width()
+        #         column_widths = [int(ratio * screen_width) for ratio in column_ratios]
+        #         for i in range(8):
+        #                 self.tableWidget.setColumnWidth(i, column_widths[i])
+        #         for i, report in enumerate(self.list_reports_filter):
+        #                 self.counter = round(i / len(self.list_reports_filter) * 100)
+        #                 self.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
+        #                 if 'random' in report['person_name']:
+        #                         name = "Người lạ"
+        #                 else:
+        #                         name = report['person_name']
+        #                 self.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
+        #                 self.tableWidget.setItem(i, 2, QTableWidgetItem(str(report['age'])))
+        #                 if report['gender'] == 1:
+        #                         gender = "Nam"
+        #                 elif report['gender'] == 0:
+        #                         gender = "Nữ"
+        #                 else:
+        #                         gender = "Không xác định"
+        #                 self.tableWidget.setItem(i, 3, QTableWidgetItem(str(gender)))
+        #                 if report['mask'] == 1:
+        #                        mask = "Có"
+        #                 elif report['mask'] == 0:
+        #                         mask = "Không"
+        #                 self.tableWidget.setItem(i, 4, QTableWidgetItem(str(mask)))
+        #                 if report['code_color'] is None:
+        #                         color = "Không xác định"
+        #                         self.tableWidget.setItem(i, 5, QTableWidgetItem(str(color)))
+        #                 else:
+        #                         color = report['code_color']
+        #                         numbers = [int(num) for num in color.split(',')]
+        #                         image_color = Image.new('RGB', (128, 128), (numbers[0], numbers[1], numbers[2]))
+        #                         image_pil = image_color.tobytes()
+        #                         q_image = QImage(image_pil, image_color.width, image_color.height, QImage.Format_RGB888)
 
-                                # Tạo QPixmap từ QImage
-                                pixmap_color = QPixmap.fromImage(q_image)
-                                item = QTableWidgetItem()
-                                item.setData(Qt.DecorationRole, pixmap_color)
-                                self.tableWidget.setItem(i, 5, item)
+        #                         # Tạo QPixmap từ QImage
+        #                         pixmap_color = QPixmap.fromImage(q_image)
+        #                         item = QTableWidgetItem()
+        #                         item.setData(Qt.DecorationRole, pixmap_color)
+        #                         self.tableWidget.setItem(i, 5, item)
                         
-                        self.tableWidget.setItem(i, 6, QTableWidgetItem(str(self.convert_timestamp_to_datetime(report['time']))))
-                        if len(report['images']) > 0:
-                                image_path = report['images'][0]['path']
+        #                 self.tableWidget.setItem(i, 6, QTableWidgetItem(str(self.convert_timestamp_to_datetime(report['time']))))
+        #                 if len(report['images']) > 0:
+        #                         image_path = report['images'][0]['path']
 
-                                pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
-                                item = QTableWidgetItem()
-                                item.setData(Qt.DecorationRole, pixmap)
-                                self.tableWidget.setItem(i, 7, item)
+        #                         pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
+        #                         item = QTableWidgetItem()
+        #                         item.setData(Qt.DecorationRole, pixmap)
+        #                         self.tableWidget.setItem(i, 7, item)
+        #                         self.tableWidget.setRowHeight(i, pixmap.height())
+        #                         self.tableWidget.setColumnWidth(4, pixmap.width() + 20)
 
-                                self.tableWidget.setRowHeight(i, pixmap.height())
-
-                                self.tableWidget.setColumnWidth(4, pixmap.width() + 20)
-
-                self.tableWidget.cellClicked.connect(self.on_row_selected)
+                # self.tableWidget.cellClicked.connect(self.on_row_selected)
 
         def on_row_selected(self):
                 selected_rows = self.tableWidget.selectionModel().selectedRows()
@@ -599,7 +583,10 @@ class PAGEREPORT(QDialog):
                         video_id = self.list_reports_filter[item]['id']
                         for image in list_image:
                                 path_image = image['path']
-                                list_image_path.append(path_image)
+                                name_image = os.path.basename(path_image)
+                                if "origin_" in name_image:
+                                        list_image_path.append(path_image)
+
                         page_image = PAGEIMAGEVIEW(list_image_path,video_id)
                         page_image.exec_()
 
@@ -629,64 +616,6 @@ class PAGEREPORT(QDialog):
                         if len(self.list_file_path) > 0:
                                 loading_screen = LoadingScreen(self)
                                 loading_screen.import_loading()
-
-        def filter_report_query(self):
-                for file_path in self.list_file_path:
-                        print("Selected file:", file_path)
-                        frame_import = cv2.imread(file_path)
-                        max_report = None
-                        min_report = None
-                        self.list_reports_filter = []
-                        list_instance = self.analyzer.analyze_detect_face(frame_import)
-
-                        if len(list_instance) > 0 and list_instance[0][1] is not None:
-                                for report in self.list_reports:
-                                        if unidecode(report['person_name']).lower() == unidecode(list_instance[0][1]).lower():
-                                                self.list_reports_filter.append(report)
-                        # Unknown person and have face
-                        elif len(list_instance) > 0 and list_instance[0][1] is None: 
-                                feature_image_import = self.analyzer.get_feature(frame_import)[0]
-                                for report in self.list_reports:
-                                        list_path_image = []
-                                        list_class_image = report['images']
-                                        for image in list_class_image:
-                                                list_path_image.append(image['path'])
-                                        for path_image in list_path_image:
-                                                frame_ref = cv2.imread(path_image)
-                                                feature_ref = self.analyzer.get_feature(frame_ref)
-                                                if len(feature_ref) > 0:
-                                                        similarity = self.analyzer.rec.compute_sim(feature_image_import, feature_ref[0])
-                                                else:
-                                                        similarity = 0
-                                                if similarity > 0.43:
-                                                        max_report = report
-                                                        break
-                                                
-                                        if max_report is not None and max_report not in self.list_reports_filter:             
-                                                self.list_reports_filter.append(max_report)
-                        elif len(list_instance) == 0:
-                                h_import,w1_import,_ = frame_import.shape
-                                xyxys_import =  np.array([[0,0,w1_import,h_import]])
-                                feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
-                                for report in self.list_reports:
-                                        list_path_image = []
-                                        list_class_image = report['images']
-                                        for image in list_class_image:
-                                                list_path_image.append(image['path'])
-                                        for path_image in list_path_image:
-                                                frame_ref = cv2.imread(path_image)
-                                                results = model(frame_ref,classes=[0],conf=0.4,verbose=False)
-                                                pred_boxes = results[0].boxes
-                                                for pred in pred_boxes:
-                                                        box = pred.xyxy.squeeze().tolist()
-                                                        xyxys_ref =  np.array([[box[0],box[1],box[2],box[3]]])
-                                                        feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
-                                                        dist = self._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
-                                                        if dist < 0.25:
-                                                                min_report = report
-                                                        
-                                        if min_report is not None and min_report not in self.list_reports_filter:             
-                                                self.list_reports_filter.append(min_report)
 
         def create_pdf_report(self):
                 file_path = f"output_{self.video_id}_{time.strftime('%Y%m%d%H%M%S')}.pdf"

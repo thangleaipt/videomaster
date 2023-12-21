@@ -97,7 +97,7 @@ class SubVideoAnalyze(QRunnable):
                 list_image_label = []
                 cv2.resize(frame, (1280, 720))
                 self.index_frame += 1
-                if self.index_frame % 3 == 0:
+                if self.index_frame % int(self.fps/5) == 0:
                     image = frame.copy()
                     self.face_analyzer.index_frame = self.index_frame  
                     time_start_recognition = time.time()
@@ -325,14 +325,14 @@ class SubVideoAnalyze(QRunnable):
 
                 if label_name is not None and face_image is not None:
                     path_dir_image = f"{STATIC_FOLDER}/results/Camera_{self.name_video}/{datetime.now().strftime(DATE_TIME_FORMAT)}/id_{label_name.replace(' ', '')}"
-                    path_save_face_image = f"{path_dir_image}/{time.time()}.jpg"
+                    path_save_face_image = f"{path_dir_image}/face_{time.time()}.jpg"
                     if person_image is not None:
                         path_save_person_image = f"{path_dir_image}/person_{time.time()}.jpg"
                 elif label_name is None:
                     if face_image is not None or person_image is not None:
                         path_dir_image = f"{STATIC_FOLDER}/results/Camera_{self.name_video}/{datetime.now().strftime(DATE_TIME_FORMAT)}/id_{guid}"
                     if face_image is not None:
-                        path_save_face_image = f"{path_dir_image}/{time.time()}.jpg"
+                        path_save_face_image = f"{path_dir_image}/face_{time.time()}.jpg"
                     if person_image is not None:
                         path_save_person_image = f"{path_dir_image}/person_{time.time()}.jpg"
 
@@ -382,8 +382,9 @@ class SubVideoAnalyze(QRunnable):
                     if extend_face_image is not None and path_save_face_image != "":
                         if extend_face_image.shape[0] > 0 and extend_face_image.shape[1] > 0:
                             
-                            face_image = cv2.resize(face_image, (128, 128))
+                            # face_image = cv2.resize(face_image, (128, 128))
                             cv2.imwrite(path_save_face_image, face_image)
+                            person_model.list_image_path.append(path_save_face_image)
                             # list_image_label.append([path_save_face_image, label_name, position, age, gender, guid, main_color_clothes,label_mask, time_label])
                             person_model.face_image = path_save_face_image
 
@@ -398,12 +399,12 @@ class SubVideoAnalyze(QRunnable):
                     if person_image is not None and person_image.shape[0] > 0 and person_image.shape[1] > 0:
                             if extend_face_image is None:
                                 person_model.role = 1
-                            if person_image.shape[1] > 128 and person_image.shape[1] > person_image.shape[0]:
-                                person_image = cv2.resize(person_image, (128, int(person_image.shape[0] * 128 / person_image.shape[1])))
-                            elif person_image.shape[0] > 128 and person_image.shape[1] <= person_image.shape[0]:
-                                person_image = cv2.resize(person_image, (int(person_image.shape[1] * 128 / person_image.shape[0]),128))
+                            # if person_image.shape[1] > 128 and person_image.shape[1] > person_image.shape[0]:
+                            #     person_image = cv2.resize(person_image, (128, int(person_image.shape[0] * 128 / person_image.shape[1])))
+                            # elif person_image.shape[0] > 128 and person_image.shape[1] <= person_image.shape[0]:
+                            #     person_image = cv2.resize(person_image, (int(person_image.shape[1] * 128 / person_image.shape[0]),128))
                             cv2.imwrite(path_save_person_image, person_image)
-                           
+                            person_model.list_image_path.append(path_save_person_image)
                             person_model.person_image = path_save_person_image
 
                             # if path_save_person_image not in person_model.list_image_path:
@@ -417,7 +418,7 @@ class SubVideoAnalyze(QRunnable):
                     self.list_total_id.append(guid)
                 else:
                     index = self.list_total_id.index(guid)
-                    if self.index_frame % 2 == 0:
+                    if self.index_frame % 1 == 0:
                         if label_name is not None:
                             self.list_person_model[index].list_face_name.append(label_name)
                             if len(self.list_person_model[index].list_face_name) > 50:
@@ -440,7 +441,7 @@ class SubVideoAnalyze(QRunnable):
                     self.list_person_model[index].counting_tracking += 1
 
                     # Send telegram
-                    if (self.list_person_model[index].counting_tracking % 5 == 0 or self.list_person_model[index].counting_tracking == 1 or (self.list_person_model[index].label_name != label_name and label_name is not None)):
+                    if (self.list_person_model[index].counting_tracking % 1 == 0 or self.list_person_model[index].counting_tracking == 1 or (self.list_person_model[index].label_name != label_name and label_name is not None)):
                         if label_name is not None:
                             self.list_person_model[index].label_name = label_name
                         if len(self.list_person_model[index].list_gender) > 0:
@@ -461,11 +462,11 @@ class SubVideoAnalyze(QRunnable):
                         
                         if extend_face_image is not None and path_save_face_image != "":
                             if extend_face_image.shape[0] > 0 and extend_face_image.shape[1] > 0:
-                                extend_face_image = cv2.resize(extend_face_image, (128, 128))
+                                # extend_face_image = cv2.resize(extend_face_image, (128, 128))
                                 cv2.imwrite(path_save_face_image, extend_face_image)
                                 self.list_person_model[index].face_image = path_save_face_image
-                                # if path_save_face_image not in self.list_person_model[index].list_image_path:
-                                    # self.list_person_model[index].list_image_path.append(path_save_face_image)
+                                if path_save_face_image not in self.list_person_model[index].list_image_path:
+                                    self.list_person_model[index].list_image_path.append(path_save_face_image)
                                 
                                 if label_name is not None:
                                     self.list_person_model[index].role = 2
@@ -476,15 +477,15 @@ class SubVideoAnalyze(QRunnable):
                                         self.list_person_model[index].role = 0
 
                         if person_image is not None and person_image.shape[0] > 0 and person_image.shape[1] > 0:
-                            if person_image.shape[1] > 128 and person_image.shape[1] > person_image.shape[0]:
-                                person_image = cv2.resize(person_image, (128, int(person_image.shape[0] * 128 / person_image.shape[1])))
-                            elif person_image.shape[0] > 128 and person_image.shape[1] <= person_image.shape[0]:
-                                person_image = cv2.resize(person_image, (int(person_image.shape[1] * 128 / person_image.shape[0]),128))
+                            # if person_image.shape[1] > 128 and person_image.shape[1] > person_image.shape[0]:
+                            #     person_image = cv2.resize(person_image, (128, int(person_image.shape[0] * 128 / person_image.shape[1])))
+                            # elif person_image.shape[0] > 128 and person_image.shape[1] <= person_image.shape[0]:
+                            #     person_image = cv2.resize(person_image, (int(person_image.shape[1] * 128 / person_image.shape[0]),128))
 
                             cv2.imwrite(path_save_person_image, person_image)
                             self.list_person_model[index].person_image = path_save_person_image
-                            # if path_save_person_image not in self.list_person_model[index].list_image_path:
-                                # self.list_person_model[index].list_image_path.append(path_save_person_image)
+                            if path_save_person_image not in self.list_person_model[index].list_image_path:
+                                self.list_person_model[index].list_image_path.append(path_save_person_image)
 
                             if extend_face_image is None:
                                 self.list_person_model[index].role = 1

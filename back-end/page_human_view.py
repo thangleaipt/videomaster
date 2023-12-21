@@ -180,7 +180,6 @@ class PAGEHUMAN(QWidget):
                     list_video_split.append(output_path)
             video.release()
             return list_video_split
-
             
     def show_dialog_video(self):
         # if len(self.list_camera_screen) > 0:

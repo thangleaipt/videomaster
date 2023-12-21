@@ -3,12 +3,32 @@ import time
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
+import cv2
+import numpy as np
+import unidecode
 
 from ui_loading_screen import Ui_LoadingScreen
 from widgets_loading import CircularProgress
 from PIL import Image
+from ultralytics import YOLO
+from controller.boxmot.trackers.strongsort.strong_sort import ReIDDetectMultiBackend
+from pathlib import Path
+import torch
+import os
+
+from config import WEIGHT_FOLDER
 
 column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
+
+reid = ReIDDetectMultiBackend(
+    weights=Path(os.path.join(WEIGHT_FOLDER,'osnet_ain_x1_0_msmt17.pt')),
+    device=torch.device(0)
+)
+
+device = torch.device(0)
+
+model = YOLO('models/yolov8m.pt')
+model.to(device)
 
 class FilterThread(QThread):
     finished = Signal()
@@ -18,7 +38,6 @@ class FilterThread(QThread):
         self.report = parent
 
     def run(self):
-        self.report.get_list_report()
         self.fill_report()
         self.finished.emit()
     
@@ -94,11 +113,91 @@ class ImportThread(QThread):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.report = parent
+        self.counter = 0
 
     def run(self):
-        self.report.filter_report_query()
+        self.filter_report_query()
         self.fill_report()
         self.finished.emit()
+        
+    def filter_report_query(self):
+                number = 0
+                for file_path in self.report.list_file_path:
+                        print("Selected file:", file_path)
+                        frame_import = cv2.imread(file_path)
+                        max_report = None
+                        min_report = None
+                        self.report.list_reports_filter = []
+                        list_instance = self.report.analyzer.analyze_detect_face(frame_import)
+
+                        if len(list_instance) > 0 and list_instance[0][1] is not None:
+                                for report in self.report.list_reports:
+                                        number += 1
+                                        self.counter = round(number / len(self.report.list_reports) * 100)
+                                        if len(self.report.list_reports) <number:
+                                               self.counter = 100
+                                        self.progress_update.emit(self.counter)
+                                        if unidecode(report['person_name']).lower() == unidecode(list_instance[0][1]).lower():
+                                                self.report.list_reports_filter.append(report)
+                        # Unknown person and have face
+                        elif len(list_instance) > 0 and list_instance[0][1] is None: 
+                                feature_image_import = self.report.analyzer.get_feature(frame_import)[0]
+                                for report in self.report.list_reports:
+                                        number += 1
+                                        self.counter = round(number / len(self.report.list_reports) * 100)
+                                        if len(self.report.list_reports) <number:
+                                               self.counter = 100
+                                        self.progress_update.emit(self.counter)
+                                        list_class_image = report['images']
+                                        list_path_face_image = []
+                                        for image in list_class_image:
+                                                name_image = os.path.basename(image['path'])
+                                                if "face_" in name_image:
+                                                        list_path_face_image.append(image['path'])
+                                               
+                                        for path_image in list_path_face_image:
+                                                frame_ref = cv2.imread(path_image)
+                                                feature_ref = self.report.analyzer.get_feature(frame_ref)
+                                                if len(feature_ref) > 0:
+                                                        similarity = self.report.analyzer.rec.compute_sim(feature_image_import, feature_ref[0])
+                                                else:
+                                                        similarity = 0
+                                                if similarity > 0.43:
+                                                        max_report = report
+                                                        break
+                                                
+                                        if max_report is not None and max_report not in self.report.list_reports_filter:             
+                                                self.report.list_reports_filter.append(max_report)
+                                                print("Max report: ", max_report['person_name'])
+                        if len(list_instance) == 0 or len(self.report.list_reports_filter) > 0:
+                                h_import,w1_import,_ = frame_import.shape
+                                xyxys_import =  np.array([[0,0,w1_import,h_import]])
+                                feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
+                                for report in self.report.list_reports:
+                                        number += 1
+                                        self.counter = round(number / len(self.report.list_reports) * 100)
+                                        if len(self.report.list_reports) <number:
+                                               self.counter = 100
+                                        self.progress_update.emit(self.counter)
+                                        list_path_person_image = []
+                                        list_class_image = report['images']
+                                        for image in list_class_image:
+                                                name_image = os.path.basename(image['path'])
+                                                if "person_" in name_image:
+                                                        list_path_person_image.append(image['path'])
+                                
+                                        for path_image in list_path_person_image:
+                                                frame_ref = cv2.imread(path_image)
+                                                h_ref,w1_ref,_ = frame_ref.shape
+                                                xyxys_ref =  np.array([[0,0,w1_ref,h_ref]])
+                                                feature_ref = reid.get_features(xyxys_ref,frame_ref)[0]
+                                                dist = self.report._cosine_distance(np.array([feature_image_import]), np.array([feature_ref]))[0][0]
+                                                if dist < 0.2:
+                                                        min_report = report
+                                                        
+                                        if min_report is not None and min_report not in self.report.list_reports_filter:             
+                                                self.report.list_reports_filter.append(min_report)
+                                                print("Min report: ", min_report['person_name'])
 
     def fill_report(self):
                 if len(self.report.list_reports_filter) >= 16:
@@ -114,9 +213,6 @@ class ImportThread(QThread):
                 for i in range(8):
                         self.report.tableWidget.setColumnWidth(i, column_widths[i])
                 for i, report in enumerate(self.report.list_reports_filter):
-                        print(f"Counter: {self.report.counter}")
-                        self.progress_update.emit(self.report.counter)
-                        self.report.counter = round(i / len(self.report.list_reports_filter) * 100)
                         self.report.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
                         if 'random' in report['person_name']:
                                 name = "Người lạ"
@@ -154,7 +250,6 @@ class ImportThread(QThread):
                         
                         self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(self.report.convert_timestamp_to_datetime(report['time']))))
                         if len(report['images']) > 0:
-                                print(f"report['images']: Initial:")
                                 image_path = report['images'][0]['path']
 
                                 pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
@@ -167,6 +262,8 @@ class ImportThread(QThread):
                                 self.report.tableWidget.setColumnWidth(4, pixmap.width() + 20)
 
                 self.report.tableWidget.cellClicked.connect(self.report.on_row_selected)
+
+        
 
 class LoadingScreen(QMainWindow):
     def __init__(self, parent=None):
