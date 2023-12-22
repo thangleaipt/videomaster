@@ -521,15 +521,15 @@ class Ui_MainWindow(object):
         self.btn_maximize_restore.setMinimumSize(QSize(40, 0))
         self.btn_maximize_restore.setMaximumSize(QSize(40, 16777215))
         self.btn_maximize_restore.setStyleSheet(u"QPushButton {	\n"
-"	border: none;\n"
-"	background-color: transparent;\n"
-"}\n"
-"QPushButton:hover {\n"
-"	background-color: rgb(52, 59, 72);\n"
-"}\n"
-"QPushButton:pressed {	\n"
-"	background-color: rgb(85, 170, 255);\n"
-"}")
+        "	border: none;\n"
+        "	background-color: transparent;\n"
+        "}\n"
+        "QPushButton:hover {\n"
+        "	background-color: rgb(52, 59, 72);\n"
+        "}\n"
+        "QPushButton:pressed {	\n"
+        "	background-color: rgb(85, 170, 255);\n"
+        "}")
         icon1 = QIcon()
         icon1.addFile(u":/16x16/icons/16x16/cil-window-maximize.png", QSize(), QIcon.Normal, QIcon.Off)
         self.btn_maximize_restore.setIcon(icon1)
@@ -557,7 +557,6 @@ class Ui_MainWindow(object):
         self.btn_close.setIcon(icon2)
 
         self.horizontalLayout_5.addWidget(self.btn_close)
-
 
         self.horizontalLayout_4.addWidget(self.frame_btns_right, 0, Qt.AlignRight)
 
@@ -780,6 +779,7 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.btn_minimize, self.btn_maximize_restore)
         QWidget.setTabOrder(self.btn_maximize_restore, self.btn_close)
         QWidget.setTabOrder(self.btn_close, self.btn_toggle_menu)
+
         # QWidget.setTabOrder(self.btn_toggle_menu, self.checkBox)
         # QWidget.setTabOrder(self.checkBox, self.comboBox)
         # QWidget.setTabOrder(self.comboBox, self.radioButton)

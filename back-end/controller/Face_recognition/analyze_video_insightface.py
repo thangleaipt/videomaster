@@ -1,21 +1,12 @@
 from collections import Counter
 from datetime import datetime
 import os
-import queue
-import threading
-import winsound
 import pygame
 from unidecode import unidecode
-import tkinter as tk
-from PIL import Image, ImageTk
 
 from gtts import gTTS
 
-from controller.mivolo.person_model import PersonModel
-
-from server.config import DATE_TIME_FORMAT, DATETIME_FORMAT
-
-from controller.Face_recognition.report import send_report_to_db
+from server.config import DATETIME_FORMAT
 
 from controller.mivolo.data.misc import prepare_classification_images
 from controller.mivolo.model.mi_volo import MiVOLO
@@ -27,10 +18,9 @@ from controller.Face_recognition.insightface.scrfd import SCRFD
 from controller.Face_recognition.insightface.arcface_onnx import ArcFaceONNX
 from os import path
 import pickle
-from tqdm import tqdm
 import pandas as pd
 import time
-from config import DEVICE, STATIC_FOLDER, WEIGHT_FOLDER, DATASET_PEOPLE_FOLDER
+from config import DEVICE, WEIGHT_FOLDER, DATASET_PEOPLE_FOLDER
 from unidecode import unidecode
 
 from controller.mask_detection.mask_analyze import MaskDetector

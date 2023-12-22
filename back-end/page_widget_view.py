@@ -1,7 +1,5 @@
 from datetime import datetime, timezone, timedelta
-import math
-import os
-import threading
+
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
     QRect, QSize, QUrl, Qt, QDateTime, QTime)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
@@ -10,10 +8,7 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
 
 from PySide2.QtWidgets import *
 from page_report_view import PAGEREPORT
-from server.reports.services import get_videos_path_db, get_videos_service
-import cv2
-import moviepy.editor as mp
-from PyQt5.QtCore import pyqtSlot
+from server.reports.services import get_videos_path_db
 
 
 column_ratios = [0.2, 0.2, 0.3, 0.3]

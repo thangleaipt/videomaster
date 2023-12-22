@@ -12,10 +12,9 @@ from server.reports.services import get_reports_db
 import cv2
 import numpy as np
 
-from config import WEIGHT_FOLDER, STATIC_FOLDER
+from config import STATIC_FOLDER
 from PySide2.QtMultimedia import QMediaPlayer, QMediaContent
 from PySide2.QtMultimediaWidgets import QVideoWidget
-from PIL import Image
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
@@ -100,6 +99,15 @@ class PAGEREPORT(QDialog):
                 self.set_ui()
                 self.retranslateUi()
                 self.setWindowTitle(f"{index}")
+
+        def seconds_to_string(self, seconds):
+                year, remainder = divmod(seconds, 31536000)
+                months, remainder = divmod(seconds, 2592000)
+                days, remainder = divmod(seconds, 86400)
+                hours, remainder = divmod(remainder, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                return f"{year:02d}-{months:02d}-{days:02d}-{hours:02d}:{minutes:02d}:{seconds:02d}"
+        
         def set_ui(self):
                 self.verticalLayout_6 = QVBoxLayout(self)
                 self.verticalLayout_6.setObjectName(u"verticalLayout_6")
@@ -115,29 +123,30 @@ class PAGEREPORT(QDialog):
                 self.date_time_layout = QHBoxLayout()
 
                 # Add date-time edit controls to the filter layout
-                start_label = QLabel("Start Date:", self.filter_groupbox)
+                start_label = QLabel("Start Time:", self.filter_groupbox)
                 self.date_time_layout.addWidget(start_label)
                 self.date_time_layout.addSpacing(2)
-                self.dateTimeEdit_start = QDateTimeEdit(self.filter_groupbox)
+                self.dateTimeEdit_start = QLineEdit(self.filter_groupbox)
                 self.dateTimeEdit_start.setObjectName(u"dateTimeEdit_start")
                 self.dateTimeEdit_start.setFixedSize(200, 50)
-                self.dateTimeEdit_start.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
-                start_date = QDateTime.fromString(self.time, date_time_format)
-                start_date.setTime(QTime(0, 0, 0))
-                self.dateTimeEdit_start.setDateTime(start_date)
+                # start_string = self.seconds_to_string(0)
+                start_date = 0
+                
+                self.dateTimeEdit_start.setText(str(start_date))
                 self.date_time_layout.addWidget(self.dateTimeEdit_start)
                 self.date_time_layout.addSpacing(20)
 
-                end_label = QLabel("End Date:", self.filter_groupbox)
+                end_label = QLabel("End Time:", self.filter_groupbox)
                 self.date_time_layout.addWidget(end_label)
                 self.date_time_layout.addSpacing(2)
-                self.dateTimeEdit_end = QDateTimeEdit(self.filter_groupbox)
+                self.dateTimeEdit_end = QLineEdit(self.filter_groupbox)
                 self.dateTimeEdit_end.setObjectName(u"dateTimeEdit_end")
                 self.dateTimeEdit_end.setFixedSize(200, 50)
-                self.dateTimeEdit_end.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
-                end_date = QDateTime.fromString(self.time, date_time_format)
-                end_date.setTime(QTime(23, 59, 59))
-                self.dateTimeEdit_end.setDateTime(end_date)
+                # self.dateTimeEdit_end.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
+                # end_date = QDateTime.fromString(self.time, date_time_format)
+                # end_date.setTime(QTime(23, 59, 59))
+                end_date = 0
+                self.dateTimeEdit_end.setText(str(end_date))
                 self.date_time_layout.addWidget(self.dateTimeEdit_end)
 
                 self.filter_layout.addLayout(self.date_time_layout)
@@ -454,9 +463,10 @@ class PAGEREPORT(QDialog):
 
         def get_list_report(self):
                 # Get the Unix timestamp from self.dateTimeEdit_start
-                start_timestamp = self.dateTimeEdit_start.dateTime().toSecsSinceEpoch()
+                # start_timestamp = self.dateTimeEdit_start.dateTime().toSecsSinceEpoch()
+                start_timestamp = self.dateTimeEdit_start.text()
                 # Get the Unix timestamp from self.dateTimeEdit_end
-                end_timestamp = self.dateTimeEdit_end.dateTime().toSecsSinceEpoch()
+                end_timestamp = self.dateTimeEdit_end.text()
                 page_num = None
                 page_size = None
 
@@ -490,7 +500,7 @@ class PAGEREPORT(QDialog):
                         isface = 0
                 else:
                         isface = None
-                self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
+                self.list_reports = get_reports_db(self.video_id, page_num, page_size, int(start_timestamp), int(end_timestamp), begin_age, end_age, gender, mask, isface)
                 print(f"Length list_reports: {len(self.list_reports)}")
                 self.list_reports_filter = self.list_reports
 

@@ -203,58 +203,58 @@ def get_reports_service(video_id):
 def get_reports_db(video_id, page_num, page_size, start_time, end_time, begin_age, end_age, gender, mask, isface):
   session = db_session()
   try:
-    if start_time is None or end_time is None:
-      return jsonify({"message": "Bad request !"}), 400
+   
+    reports = session.query(
+      Report.id,
+      Report.person_name,
+      Report.age,
+      Report.gender,
+      Report.mask,
+      Report.code_color,
+      Report.time,
+      Report.isface
+    ).filter(and_(
+      Report.video_id == video_id,
+      Report.time >= start_time,
+      or_(
+        Report.time <= end_time,
+        end_time == 0
+      ),
+      Report.age >= begin_age,
+      Report.age <= end_age,
+      or_(
+        Report.gender == gender,
+        gender is None
+      ),
+      or_(
+        Report.mask == mask,
+        mask is None
+      ),
+      or_(
+        Report.isface == isface,
+        isface is None
+      )
+    ))
+
+    totalReports = reports.count()
+    
+    # pagination
+    if page_num is not None and page_size is not None:
+      offset = (page_num - 1) * page_size
+      reports = reports.order_by(desc(Report.id))\
+        .offset(offset).limit(page_size).all()
     
     else:
-      reports = session.query(
-        Report.id,
-        Report.person_name,
-        Report.age,
-        Report.gender,
-        Report.mask,
-        Report.code_color,
-        Report.time,
-        Report.isface
-      ).filter(and_(
-        Report.video_id == video_id,
-        Report.time >= start_time,
-        Report.time <= end_time,
-        Report.age >= begin_age,
-        Report.age <= end_age,
-        or_(
-          Report.gender == gender,
-          gender is None
-        ),
-        or_(
-          Report.mask == mask,
-          mask is None
-        ),
-        or_(
-          Report.isface == isface,
-          isface is None
-        )
-      ))
+      reports = reports.order_by(desc(Report.id)).all()
+    
+    for i, report in enumerate(reports):
+      images = session.query(ReportImage).filter(ReportImage.report_id == report.id)
+      reports[i] = report._asdict()
+      reports[i]['images'] = images_schema.dump(images)
 
-      totalReports = reports.count()
-      
-      # pagination
-      if page_num is not None and page_size is not None:
-        offset = (page_num - 1) * page_size
-        reports = reports.order_by(desc(Report.id))\
-          .offset(offset).limit(page_size).all()
-      
-      else:
-        reports = reports.order_by(desc(Report.id)).all()
-      
-      for i, report in enumerate(reports):
-        images = session.query(ReportImage).filter(ReportImage.report_id == report.id)
-        reports[i] = report._asdict()
-        reports[i]['images'] = images_schema.dump(images)
-
-      return reports
+    return reports
   except Exception as e:
-    return []
+    print(f"[get_reports_db]: {e}")
   
   finally:
     session.close()

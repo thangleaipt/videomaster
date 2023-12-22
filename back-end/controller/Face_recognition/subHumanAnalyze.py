@@ -1,10 +1,10 @@
 from datetime import datetime
 import logging
 import os
-import queue
 import threading
 import time
 import uuid
+import torch
 
 from unidecode import unidecode
 from collections import Counter
@@ -12,15 +12,12 @@ from ultralytics.yolo.utils.plotting import Annotator
 
 from controller.mivolo.person_model import PersonModel
 
-from controller.Face_recognition.report import send_report_to_db
-
 from server.config import DATE_TIME_FORMAT, DATETIME_FORMAT
 from server.reports.services import add_report_service
 import cv2
 from controller.Face_recognition.analyze_video_insightface import FaceAnalysisInsightFace
 from controller.mivolo.predictor import Predictor
 
-from PySide2.QtGui import (QPixmap,QImage)
 from PySide2.QtWidgets import *
 from config import STATIC_FOLDER
 from PySide2.QtCore import QRunnable, Signal, QObject
@@ -116,9 +113,12 @@ class SubVideoAnalyze(QRunnable):
                     self.send_report_to_db()
                     self.list_total_id = []
                     self.list_person_model = []
-                    
+
                 self.signals.result.emit(None)
+                torch.cuda.empty_cache()
                 print(f"{self.video_path} DONE")
+                del self.face_analyzer
+                del self.predictor
                 # self.signals.finished.emit()
                 self.stop()
                 return
@@ -418,11 +418,11 @@ class SubVideoAnalyze(QRunnable):
                     cv2.imwrite(path_image, image_save)
                     person_model.list_image_path.append(path_image)
 
-                    current_time_seconds = self.index_frame / self.fps
+                    current_time_seconds = self.index_frame
                     current_time_timedelta = timedelta(seconds=current_time_seconds)
                     formatted_time = str(current_time_timedelta)
 
-                    person_model.time = datetime.now().strftime(DATETIME_FORMAT)
+                    person_model.time = int(current_time_seconds)
                     self.list_person_model.append(person_model)
                     self.list_total_id.append(guid)
                 else:
@@ -502,17 +502,7 @@ class SubVideoAnalyze(QRunnable):
                                 self.list_person_model[index].role = 1
 
                         cv2.imwrite(path_image, image_save)
-                        self.list_person_model[index].list_image_path.append(path_image)
-            
-            # Send data to report
-            # if self.frame_count - self.index_frame < 10 and self.index_report == 0:
-            #     logging.info(f"[analyze_video][index_frame] Send data to report: {self.index_frame}, {len(self.list_person_model)}")
-            #     if len(self.list_person_model) > 0:
-            #         self.send_report_to_db()
-            #         self.list_total_id = []
-            #         self.list_person_model = []
-            #         self.index_report += 1
-                
+                        self.list_person_model[index].list_image_path.append(path_image)  
             return frame,list_image_label
         except Exception as e:
             print(f'[{datetime.now().strftime(DATETIME_FORMAT)}][analyze][generate_frames]: {e}')
@@ -535,9 +525,10 @@ class SubVideoAnalyze(QRunnable):
                 age = int(person_model.average_age)
             else: 
                 age = 0
-            person_model_time = datetime.strptime(person_model.time, "%Y-%m-%d %H:%M:%S")
+            # person_model_time = datetime.strptime(person_model.time, "%Y-%m-%d %H:%M:%S")
             # Lấy timestamp
-            time_model = person_model_time.timestamp()
+            # time_model = person_model_time.timestamp()
+            time_model = person_model.time
             # time_model = datetime.timestamp(person_model.time)
             if person_model.average_check_mask == "Mask":
                 mask = 1
@@ -575,13 +566,11 @@ class CameraWidget(QWidget):
 
         self.camera_label.setObjectName(u"camera_label_{}".format(index))
         self.camera_label.setStyleSheet("border: 2px solid red;")
-
         self.camera_label.setAlignment(Qt.AlignCenter)
-
         self.setLayout(self.camera_layout)
-        self.worker = SubVideoAnalyze()
 
     def start_camera(self):
+        self.worker = SubVideoAnalyze()
         self.worker.init_path(self.path, self.path_origin)
         self.worker.signals.result.connect(self.display_image)
         # self.worker.signals.updateUI.connect(self.update_ui)
@@ -593,19 +582,17 @@ class CameraWidget(QWidget):
     def stop_camera(self):
         # Stop the camera capture
         if self.worker:
-            # self.worker.signals.result.disconnect(self.display_image)
-            # self.worker.signals.updateUI.disconnect(self.update_ui)
-            time.sleep(1)
-            self.worker.stop()
+            self.worker.signals.result.disconnect(self.display_image)
+            self.worker = None
         self.thread_pool.clear()
 
         print(f"Length thread pool: {self.thread_pool.activeThreadCount()}")
-        self.camera_layout.removeWidget(self.camera_label)
-        self.camera_label.deleteLater()
-        self.grid_layout.removeWidget(self.list_camera_screen[self.path])
-        self.list_camera_screen[self.path].deleteLater()
-        del self.camera_label
-        del self.list_camera_screen[self.path]
+        # self.camera_layout.removeWidget(self.camera_label)
+        # self.camera_label.deleteLater()
+        # self.grid_layout.removeWidget(self.list_camera_screen[self.path])
+        # self.list_camera_screen[self.path].deleteLater()
+        # del self.camera_label
+        # del self.list_camera_screen[self.path]
 
     def display_image(self, frame):
         # Display the captured frame

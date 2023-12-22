@@ -23,6 +23,7 @@ from PySide2.QtWidgets import *
 from ui_Formlogin import Login
 # GUI FILE
 from app_modules import *
+from check_user import verify_authorization
 
 
 class LoginWindow(QMainWindow):
@@ -77,11 +78,17 @@ class LoginWindow(QMainWindow):
 
     def click_login(self):
         print("click button login")
-        # Hide login
-        self.close()
-        window = MainWindow()
-        # window.show()
-        
+        user = self.ui.lineEdit_Username.text()
+        password = self.ui.lineEdit_Password.text()
+        verify = verify_authorization(user, password)
+        if verify is True:
+            # Hide login
+            self.close()
+            window = MainWindow()
+            # window.show()
+        else:
+            QMessageBox.warning(self, "Error", "Wrong username or password", QMessageBox.Ok)
+            
 
     def mousePressEvent(self, event):
         self.drag_pos = event.globalPos()
@@ -121,14 +128,10 @@ class MainWindow(QMainWindow):
 
         ## ==> ADD CUSTOM MENUS
         self.ui.stackedWidget.setMinimumWidth(30)
-        # UIFunctions.addNewMenu(self, "CAMERA", "btn_camera", "url(:/16x16/icons/16x16/cil-camera.png)", True)
         UIFunctions.addNewMenu(self, "HUMAN", "btn_human", "url(:/16x16/icons/16x16/cil-movie.png)", True)
         UIFunctions.addNewMenu(self, "VEHICLES", "btn_vehicles", "url(:/16x16/icons/16x16/cil-movie.png)", True)
-        # UIFunctions.addNewMenu(self, "TẠO MỚI", "btn_create", "url(:/16x16/icons/16x16/cil-people.png)", True)
         UIFunctions.addNewMenu(self, "USER", "btn_new_user", "url(:/16x16/icons/16x16/cil-user-follow.png)", True)
         UIFunctions.addNewMenu(self, "REPORT", "btn_widgets", "url(:/16x16/icons/16x16/cil-equalizer.png)", False)
-        # UIFunctions.addNewMenu(self, "REPORT", "btn_report", "url(:/16x16/icons/16x16/cil-chart-pie.png)", False)
-        ## ==> END ##
 
         # START MENU => SELECTION
         UIFunctions.selectStandardMenu(self, "btn_human")
@@ -160,45 +163,13 @@ class MainWindow(QMainWindow):
         self.ui.frame_label_top_btns.mouseMoveEvent = moveWindow
         ## ==> END ##
 
-        ## ==> LOAD DEFINITIONS
         ########################################################################
         UIFunctions.uiDefinitions(self)
         ## ==> END ##
-
-        ########################################################################
-        ## END - WINDOW ATTRIBUTES
-        ############################## ---/--/--- ##############################
-
-
-
-
-        ########################################################################
-        #                                                                      #
-        ## START -------------- WIDGETS FUNCTIONS/PARAMETERS ---------------- ##
-        #                                                                      #
-        ## ==> USER CODES BELLOW                                              ##
-        ########################################################################
-
-
-
-        ## ==> QTableWidget RARAMETERS
-        ########################################################################
-        # self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        ## ==> END ##
-
-
-
-        ########################################################################
-        #                                                                      #
-        ## END --------------- WIDGETS FUNCTIONS/PARAMETERS ----------------- ##
-        #                                                                      #
-        ############################## ---/--/--- ##############################
-
-
-        ## SHOW ==> MAIN WINDOW
-        ########################################################################
         self.show()
         ## ==> END ##
+
+
 
     ########################################################################
     ## MENUS ==> DYNAMIC MENUS FUNCTIONS
@@ -219,13 +190,6 @@ class MainWindow(QMainWindow):
             UIFunctions.labelPage(self, "vehicles")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-        # if btnWidget.objectName() == "btn_similarity":
-        #     self.ui.stackedWidget.setCurrentWidget(self.ui.page_similarity)
-        #     UIFunctions.resetStyle(self, "btn_similarity")
-        #     UIFunctions.labelPage(self, "similarity")
-        #     btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
-    
-        
         # PAGE NEW USER
         if btnWidget.objectName() == "btn_new_user":
             self.ui.stackedWidget.setCurrentWidget(self.ui.add_user)
@@ -240,12 +204,6 @@ class MainWindow(QMainWindow):
             UIFunctions.resetStyle(self, "btn_widgets")
             UIFunctions.labelPage(self, "Report")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
-
-    ## ==> END ##
-
-    ########################################################################
-    ## START ==> APP EVENTS
-    ########################################################################
 
     ## EVENT ==> MOUSE DOUBLE CLICK
     ########################################################################
@@ -286,20 +244,16 @@ class MainWindow(QMainWindow):
     ########################################################################
     ## END ==> APP EVENTS
     ############################## ---/--/--- ##############################
-    def closeEvent(self, event):
-        self.close()
-        QCoreApplication.quit()  # Tắt ứng dụng
-        event.accept()
+    # def closeEvent(self, event):
+    #     self.close()
+    #     QCoreApplication.quit()  # Tắt ứng dụng
+    #     event.accept()
 
 def init_app():
     app = QApplication(sys.argv)
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
-    # window = MainWindow()
-    # window.show()
     login_window = LoginWindow()
-    # loading  = LoadingScreen()
-    # loading.show()
     sys.exit(app.exec_())
 
 if __name__ == "__main__":

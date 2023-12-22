@@ -237,6 +237,14 @@ class UIFunctions(MainWindow):
         ## SHOW ==> CLOSE APPLICATION
         self.ui.btn_close.clicked.connect(lambda: self.close())
 
+    def close_app(self):
+        button = QMessageBox.question(self, "Quit", "Thoát ứng dụng", QMessageBox.Yes, QMessageBox.No)
+
+        if button == QMessageBox.Yes:
+            self.close()
+        else:
+            pass
+
 
     ########################################################################
     ## END - GUI DEFINITIONS

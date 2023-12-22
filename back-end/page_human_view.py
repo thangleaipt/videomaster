@@ -1,20 +1,16 @@
 
-import math
 import os
-import threading
 from PySide2.QtCore import (QSize,QThreadPool)
 from PySide2.QtGui import (QIcon)
 
 from PySide2.QtWidgets import *
 from server.reports.services import add_video_service
-from controller.Face_recognition.analyze_video_insightface import FaceAnalysisInsightFace
 from controller.Face_recognition.subHumanAnalyze import CameraWidget
 import cv2
-import moviepy.editor as mp
+import controller.moviepy.editor as mp
 from controller.moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
-
-segment_count = 8
+segment_count = 4
 
 class MyDialog(QDialog):
     def __init__(self):
@@ -94,13 +90,6 @@ class PAGEHUMAN(QWidget):
         self.list_camera_labels = {}
         self.list_camera_layout = {}
         self.list_close_button = {}
-       
-        # self.scroll_area = QScrollArea()
-        # self.scroll_area.setWidgetResizable(True)
-        # scroll_content = QWidget()
-        # self.ref_layout = QVBoxLayout(scroll_content)
-         # Set the content widget for the scroll area
-        # self.scroll_area.setWidget(scroll_content)
     
         # Add video button
         self.add_video_button = QPushButton("Add Video")
@@ -127,9 +116,6 @@ class PAGEHUMAN(QWidget):
         self.control_layout.addLayout(self.grid_layout)
         self.control_layout.addLayout(self.add_button_layout)
         self.main_layout.addLayout( self.control_layout)
-        # self.main_layout.addWidget(self.scroll_area)
-        # loading_screen = LoadingScreen(self.thread_pool)
-        # loading_screen.show()
         self.init_camera()
 
     def init_camera(self):
@@ -182,9 +168,9 @@ class PAGEHUMAN(QWidget):
             return list_video_split
             
     def show_dialog_video(self):
-        # if len(self.list_camera_screen) > 0:
-        #     for path_camera in reversed(self.list_camera):
-        #          self.list_camera_screen[path_camera].stop_camera()
+        if len(self.list_camera_screen) > 0:
+            for path_camera in reversed(self.list_camera):
+                 self.list_camera_screen[path_camera].stop_camera()
         self.list_camera = [] 
 
         file_dialog = QFileDialog()
@@ -203,7 +189,7 @@ class PAGEHUMAN(QWidget):
                     self.list_camera_screen[index].path = path
                     self.list_camera_screen[index].path_origin = self.file_path[0]
                     self.list_camera_screen[index].start_camera()
-                    self.list_camera.append(str(index))
+                    self.list_camera.append(index)
                 
        
 

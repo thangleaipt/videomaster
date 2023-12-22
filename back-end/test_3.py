@@ -1,29 +1,37 @@
-import subprocess
+import sys
+from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QDateTimeEdit, QPushButton
 
-def split_video(input_file, output_file1, output_file2, duration1):
-    # FFmpeg command to split the video
-    cmd = [
-        'ffmpeg',
-        '-i', input_file,
-        '-t', duration1,
-        '-c', 'copy',
-        output_file1,
-        '-ss', duration1,
-        '-c', 'copy',
-        output_file2
-    ]
+class DateTimePickerApp(QWidget):
+    def __init__(self):
+        super().__init__()
 
-    # Run the FFmpeg command
-    subprocess.run(cmd)
+        self.init_ui()
 
-if __name__ == "__main__":
-    # Replace these with your input and output file paths
-    input_file = r"C:\Users\Admin\Downloads\video.mp4"
-    output_file1 = 'output_part1.mp4'
-    output_file2 = 'output_part2.mp4'
+    def init_ui(self):
+        # Tạo ô nhập ngày giờ
+        self.datetime_edit = QDateTimeEdit(self)
+        self.datetime_edit.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
 
-    # Specify the duration for the first part (in format HH:MM:SS)
-    duration1 = '00:02:30'
+        # Tạo nút để in ra ngày giờ được chọn
+        btn_get_datetime = QPushButton("Get Date and Time", self)
+        btn_get_datetime.clicked.connect(self.get_selected_datetime)
 
-    # Call the function to split the video
-    split_video(input_file, output_file1, output_file2, duration1)
+        # Sắp xếp layout
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.datetime_edit)
+        layout.addWidget(btn_get_datetime)
+
+        self.setLayout(layout)
+
+        self.setWindowTitle('Date and Time Picker')
+        self.setGeometry(300, 300, 400, 150)
+
+    def get_selected_datetime(self):
+        selected_datetime = self.datetime_edit.dateTime()
+        print("Selected date and time:", selected_datetime.toString("yyyy-MM-dd HH:mm:ss"))
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = DateTimePickerApp()
+    window.show()
+    sys.exit(app.exec_())
