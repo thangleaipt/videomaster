@@ -128,7 +128,7 @@ class PAGEREPORT(QDialog):
                 self.date_time_layout.addSpacing(2)
                 self.dateTimeEdit_start = QLineEdit(self.filter_groupbox)
                 self.dateTimeEdit_start.setObjectName(u"dateTimeEdit_start")
-                self.dateTimeEdit_start.setFixedSize(200, 50)
+                self.dateTimeEdit_start.setFixedSize(100, 50)
                 # start_string = self.seconds_to_string(0)
                 start_date = 0
                 
@@ -141,7 +141,7 @@ class PAGEREPORT(QDialog):
                 self.date_time_layout.addSpacing(2)
                 self.dateTimeEdit_end = QLineEdit(self.filter_groupbox)
                 self.dateTimeEdit_end.setObjectName(u"dateTimeEdit_end")
-                self.dateTimeEdit_end.setFixedSize(200, 50)
+                self.dateTimeEdit_end.setFixedSize(100, 50)
                 # self.dateTimeEdit_end.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
                 # end_date = QDateTime.fromString(self.time, date_time_format)
                 # end_date.setTime(QTime(23, 59, 59))
