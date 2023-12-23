@@ -299,7 +299,7 @@ class PAGEWIDGET(QWidget):
                                 time = (item_time.text())
                                 path_video = self.tableWidget.item(index.row(), 2).text()
                                 page_report = PAGEREPORT(video_id, time, self.analyzer, path_video)
-                                page_report.exec_()
+                                page_report.show()
           
         def resizeEvent(self,event):
                 screen_width = event.size().width()

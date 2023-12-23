@@ -36,7 +36,7 @@ class PAGEIMAGEVIEW(QDialog):
                 path_video_dir = f"{STATIC_FOLDER}/videos/{time.strftime('%Y%m%d')}"
                 if not os.path.exists(path_video_dir):
                         os.makedirs(path_video_dir)
-                path_video = f"{path_video_dir}/{self.video_id}.mp4"
+                path_video = f"{path_video_dir}/{self.video_id}.wmv"
                 if not os.path.exists(path_video):
                         self.create_video_from_images(self.list_path_images, video_name=path_video)
 
@@ -86,7 +86,7 @@ class PAGEIMAGEVIEW(QDialog):
                 cv2.destroyAllWindows()
                 video.release()
         
-class PAGEREPORT(QDialog):
+class PAGEREPORT(QWidget):
         def __init__(self, index, time, analyzer, path_video):
                 super().__init__()
                 self.list_reports_filter = []
@@ -97,8 +97,8 @@ class PAGEREPORT(QDialog):
                 self.analyzer = analyzer
                 self.path_video = path_video
                 self.setMinimumSize(QSize(800, 600))
-                self.setWindowFlags(Qt.WindowStaysOnTopHint)
-                self.setWindowModality(Qt.ApplicationModal)
+                # self.setWindowFlags()
+                # self.setWindowModality(Qt.ApplicationModal)
                 self.set_ui()
                 self.retranslateUi()
                 self.setWindowTitle(f"{self.path_video}_{time}")
