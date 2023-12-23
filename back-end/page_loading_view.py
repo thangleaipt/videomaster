@@ -26,6 +26,8 @@ reid = ReIDDetectMultiBackend(
 
 model = YOLO('models/yolov8m.pt')
 model.to(device)
+# Check torch cuda
+print(f"Is CUDA available: {torch.cuda.is_available()}")
 
 class FilterThread(QThread):
     finished = Signal()
@@ -89,7 +91,7 @@ class FilterThread(QThread):
                                         item.setData(Qt.DecorationRole, pixmap_color)
                                         self.report.tableWidget.setItem(i, 5, item)
                                 
-                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(self.report.convert_timestamp_to_datetime(report['time']))))
+                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(int(int(report['time'])/5))))
                                 if len(report['images']) > 0:
                                         image_path = report['images'][0]['path']
                                         pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
@@ -242,7 +244,7 @@ class ImportThread(QThread):
                                         item.setData(Qt.DecorationRole, pixmap_color)
                                         self.report.tableWidget.setItem(i, 5, item)
                                 
-                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(self.report.convert_timestamp_to_datetime(report['time']))))
+                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(int(int(report['time'])/5))))
                                 if len(report['images']) > 0:
                                         image_path = report['images'][0]['path']
 

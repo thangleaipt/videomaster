@@ -78,9 +78,10 @@ class LoginWindow(QMainWindow):
 
     def click_login(self):
         print("click button login")
-        user = self.ui.lineEdit_Username.text()
+        user = self.ui.lineEdit_Login.text()
         password = self.ui.lineEdit_Password.text()
         verify = verify_authorization(user, password)
+        # verify = True
         if verify is True:
             # Hide login
             self.close()

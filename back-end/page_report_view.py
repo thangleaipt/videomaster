@@ -464,9 +464,13 @@ class PAGEREPORT(QDialog):
         def get_list_report(self):
                 # Get the Unix timestamp from self.dateTimeEdit_start
                 # start_timestamp = self.dateTimeEdit_start.dateTime().toSecsSinceEpoch()
-                start_timestamp = self.dateTimeEdit_start.text()
+                start_timestamp = (int(self.dateTimeEdit_start.text())-1)*5
                 # Get the Unix timestamp from self.dateTimeEdit_end
-                end_timestamp = self.dateTimeEdit_end.text()
+                end_timestamp = (int(self.dateTimeEdit_end.text())+1) * 5
+                if int(self.dateTimeEdit_start.text()) == 0:
+                        start_timestamp = 0
+                if int(self.dateTimeEdit_end.text()) == 0:
+                        end_timestamp = 0
                 page_num = None
                 page_size = None
 
@@ -500,7 +504,7 @@ class PAGEREPORT(QDialog):
                         isface = 0
                 else:
                         isface = None
-                self.list_reports = get_reports_db(self.video_id, page_num, page_size, int(start_timestamp), int(end_timestamp), begin_age, end_age, gender, mask, isface)
+                self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
                 print(f"Length list_reports: {len(self.list_reports)}")
                 self.list_reports_filter = self.list_reports
 
