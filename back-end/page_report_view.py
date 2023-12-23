@@ -649,7 +649,7 @@ class PAGEREPORT(QWidget):
                         path_dir = f"{STATIC_FOLDER}\\Documents"
                         if not os.path.exists(path_dir):
                                 os.makedirs(path_dir)
-                        file_path = f"output_{self.path_video}_{time.strftime('%Y%m%d%H%M%S')}.pdf"
+                        file_path = f"output_{os.path.basename(self.path_video)}_{time.strftime('%Y%m%d%H%M%S')}.pdf"
                         file_path = os.path.join(path_dir, file_path)
                         font_path = "fonts/segoeui.ttf"
                         pdfmetrics.registerFont(TTFont("Segoe UI", font_path))

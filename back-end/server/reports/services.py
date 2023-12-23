@@ -113,7 +113,7 @@ def add_report_service(path_video, person_name, age, gender, mask, code_color, t
       Report.person_name == person_name, 
       Report.time == time
     )).first().id
-
+    print(f"Report id: {report_id} - {person_name} - {images_path}")
     # add images for report
     for path in images_path:
       report_image = ReportImage(path, report_id)
