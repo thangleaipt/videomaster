@@ -47,21 +47,21 @@ class Login(object):
         "border:0px;\n"
         " background: none;\n"
         "}")
+        font = QFont()
+        font.setFamily(u"Noto Sans CJK HK")
+        font.setBold(True)
         self.frame_Object.setFrameShape(QFrame.StyledPanel)
         self.frame_Object.setFrameShadow(QFrame.Raised)
         self.pushButton_Login = QPushButton(self.frame_Object)
         self.pushButton_Login.setObjectName(u"pushButton_Login")
         self.pushButton_Login.setGeometry(QRect(160, 590, 131, 41))
-        font = QFont()
-        font.setFamily(u"Noto Sans CJK HK")
-        font.setBold(True)
         font.setWeight(75)
         self.pushButton_Login.setFont(font)
         self.pushButton_Login.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_Login.setStyleSheet(u"QPushButton{\n"
 "	border-radius: 15px;\n"
-"	background-color: rgb(255, 51, 102);\n"
-"	color:#fff;\n"
+"	background-color: rgb(200, 200, 200);\n"
+"	color:(52, 59, 72);\n"
 "	font-size:15px;\n"
 "}\n"
 "\n"
@@ -72,29 +72,12 @@ class Login(object):
 "}\n"
 "\n"
 "")
-        self.lbl_NewUser = QLabel(self.frame_Object)
-        self.lbl_NewUser.setObjectName(u"lbl_NewUser")
-        self.lbl_NewUser.setGeometry(QRect(170, 540, 71, 17))
-        self.lbl_NewUser.setCursor(QCursor(Qt.PointingHandCursor))
-        self.lbl_NewUser.setStyleSheet(u"QLabel{\n"
-"\n"
-"color: rgb(255, 51, 102);\n"
-"\n"
-"\n"
-"}\n"
-"\n"
-"QLabel:hover {\n"
-"    color: rgb(255, 50, 121);\n"
-"}")
-        self.lbl_SignUp = QLabel(self.frame_Object)
-        self.lbl_SignUp.setObjectName(u"lbl_SignUp")
-        self.lbl_SignUp.setGeometry(QRect(240, 540, 54, 17))
-        self.lbl_SignUp.setFont(font)
-        self.lbl_SignUp.setStyleSheet(u"QLabel{\n"
-"\n"
-"color:#fff;\n"
-"}")
+        font = QFont()
+        font.setFamily(u"Noto Sans CJK HK")
+        font.setBold(True)
+
         self.lbl_UserLogin = QLabel(self.frame_Object)
+        self.lbl_UserLogin.setFont(font)
         self.lbl_UserLogin.setObjectName(u"lbl_UserLogin")
         self.lbl_UserLogin.setGeometry(QRect(110, 330, 241, 51))
         self.lbl_UserLogin.setStyleSheet(u"QLabel{\n"
@@ -143,7 +126,7 @@ class Login(object):
         self.frame_Logo.setStyleSheet(u"QFrame{\n"
         "border:0px;\n"
         "background: rgb(52, 59, 72);\n"
-        "	background-color: rgba(27, 29, 35, 160);\n"
+        # "	background-color: rgba(27, 29, 35, 160);\n"
         "  background-repeat: no-repeat;\n"
         " border-radius: 10px;\n"
         "}\n"
@@ -152,7 +135,7 @@ class Login(object):
         self.label_logo.setObjectName(u"label_logo")
         self.label_logo.setGeometry(QRect(0, 0, 241, 211))
         self.label_logo.setScaledContents(True)
-        pixmap = QPixmap(r"icons\img\photo_2023-12-06_16-22-01.jpg")
+        pixmap = QPixmap(r"icons\img\logoweb-1024x1024.png")
         self.label_logo.setPixmap(pixmap)
         self.frame_Logo.setFrameShape(QFrame.StyledPanel)
         self.frame_Logo.setFrameShadow(QFrame.Raised)
@@ -204,9 +187,13 @@ class Login(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u" Đăng nhập", None))
         self.pushButton_Login.setText(QCoreApplication.translate("MainWindow", u"Đăng nhập", None))
-        self.lbl_NewUser.setText(QCoreApplication.translate("MainWindow", u"Tạo tài khoản?", None))
-        self.lbl_SignUp.setText(QCoreApplication.translate("MainWindow", u"Đăng ký", None))
-        self.lbl_UserLogin.setText(QCoreApplication.translate("MainWindow", u"Đăng nhập", None))
+        # self.lbl_NewUser.setText(QCoreApplication.translate("MainWindow", u"Tạo tài khoản?", None))
+        # self.lbl_SignUp.setText(QCoreApplication.translate("MainWindow", u"Đăng ký", None))
+        self.lbl_UserLogin.setText(QCoreApplication.translate("MainWindow", u"ĐĂNG NHẬP", None))
+        font = QFont()
+        font.setBold(True)
+        self.lbl_UserLogin.setFont(font)
+
         self.lineEdit_Login.setText("")
         self.lineEdit_Login.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Tài khoản", None))
         self.lineEdit_Password.setText("")

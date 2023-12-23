@@ -10,6 +10,9 @@ import cv2
 import controller.moviepy.editor as mp
 from controller.moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
+from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
+    QRect, QSize, QUrl, Qt, QDateTime, QTime)
+
 segment_count = 4
 
 class MyDialog(QDialog):
@@ -90,6 +93,16 @@ class PAGEHUMAN(QWidget):
         self.list_camera_labels = {}
         self.list_camera_layout = {}
         self.list_close_button = {}
+
+        # Time
+        self.dateTimeEdit_start = QDateTimeEdit()
+        self.dateTimeEdit_start.setObjectName(u"dateTimeEdit_start")
+        self.dateTimeEdit_start.setFixedSize(200, 50)
+        self.dateTimeEdit_start.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
+        start_date = QDateTime.currentDateTime()
+        start_date.setTime(QTime(0, 0, 0))
+        self.dateTimeEdit_start.setDateTime(start_date)
+        self.add_button_layout.addWidget(self.dateTimeEdit_start)
     
         # Add video button
         self.add_video_button = QPushButton("Add Video")
@@ -163,7 +176,7 @@ class PAGEHUMAN(QWidget):
                     output_path = os.path.join(output_folder, f"segment_{i+1}.mp4")
                     if not os.path.exists(output_path):    
                             ffmpeg_extract_subclip(input_path, start_time, end_time, targetname=output_path)
-                    list_video_split.append(output_path)
+                    list_video_split.append((output_path, start_time))
             video.release()
             return list_video_split
             
@@ -181,13 +194,14 @@ class PAGEHUMAN(QWidget):
         if file_dialog.exec_():
             self.file_path = file_dialog.selectedFiles()
             if self.file_path and self.file_path != "":
-                add_video_service(self.file_path[0])
+                add_video_service(self.file_path[0], self.dateTimeEdit_start.dateTime().toSecsSinceEpoch())
                 print("Selected file:", self.file_path[0])
                 list_video_split = self.split_video(self.file_path[0])
                 # list_video_split.append(self.file_path[0])
                 for index, path in enumerate(list_video_split):
-                    self.list_camera_screen[index].path = path
+                    self.list_camera_screen[index].path = path[0]
                     self.list_camera_screen[index].path_origin = self.file_path[0]
+                    self.list_camera_screen[index].time = path[1]
                     self.list_camera_screen[index].start_camera()
                     self.list_camera.append(index)
                 

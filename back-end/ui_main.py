@@ -23,7 +23,7 @@ from PySide2.QtWidgets import *
 from page_add_user_view import PAGEADDUSER
 from page_widget_view import PAGEWIDGET
 from page_human_view import PAGEHUMAN
-from page_vehicles_view import PAGEVEHICLE
+# from page_vehicles_view import PAGEVEHICLE
 import cv2
 from controller.Face_recognition.analyze_video_insightface import FaceAnalysisInsightFace
 
@@ -706,10 +706,10 @@ class Ui_MainWindow(object):
         self.page_human = PAGEHUMAN()
         self.stackedWidget.addWidget(self.page_human)
 
-        self.page_vehicles = PAGEVEHICLE()
-        self.stackedWidget.addWidget(self.page_vehicles)
+        # self.page_vehicles = PAGEVEHICLE()
+        # self.stackedWidget.addWidget(self.page_vehicles)
 
-        self.add_user = PAGEADDUSER(self.page_human, self.page_vehicles)
+        self.add_user = PAGEADDUSER()
         self.add_user.analyzer = self.analyzer
 
         self.add_user.set_ui()

@@ -81,7 +81,7 @@ class LoginWindow(QMainWindow):
         user = self.ui.lineEdit_Login.text()
         password = self.ui.lineEdit_Password.text()
         verify = verify_authorization(user, password)
-        # verify = True
+        verify = True
         if verify is True:
             # Hide login
             self.close()
@@ -108,12 +108,12 @@ class MainWindow(QMainWindow):
         ## ==> END ##
 
         # SET ICON ==>
-        UIFunctions.userIcon(self, "WM", r"icons\img\photo_2023-12-06_16-22-01.jpg", True)
+        UIFunctions.userIcon(self, "WM", r"icons\img\logoweb-1024x1024.png", True)
         ## ==> END ##
 
         ## SET ==> WINDOW TITLE
-        self.setWindowTitle('HumanMaster')
-        UIFunctions.labelTitle(self, 'HumanMaster')
+        self.setWindowTitle('VideoMaster AI')
+        UIFunctions.labelTitle(self, 'VideoMaster AI')
         UIFunctions.labelDescription(self, 'AIPT GROUP')
         ## ==> END ##
 
@@ -129,10 +129,10 @@ class MainWindow(QMainWindow):
 
         ## ==> ADD CUSTOM MENUS
         self.ui.stackedWidget.setMinimumWidth(30)
-        UIFunctions.addNewMenu(self, "HUMAN", "btn_human", "url(:/16x16/icons/16x16/cil-movie.png)", True)
-        UIFunctions.addNewMenu(self, "VEHICLES", "btn_vehicles", "url(:/16x16/icons/16x16/cil-movie.png)", True)
-        UIFunctions.addNewMenu(self, "USER", "btn_new_user", "url(:/16x16/icons/16x16/cil-user-follow.png)", True)
-        UIFunctions.addNewMenu(self, "REPORT", "btn_widgets", "url(:/16x16/icons/16x16/cil-equalizer.png)", False)
+        UIFunctions.addNewMenu(self, "TRANG CHỦ", "btn_human", "url(:/16x16/icons/16x16/cil-movie.png)", True)
+        # UIFunctions.addNewMenu(self, "VEHICLES", "btn_vehicles", "url(:/16x16/icons/16x16/cil-movie.png)", True)
+        UIFunctions.addNewMenu(self, "ĐỐI TƯỢNG", "btn_new_user", "url(:/16x16/icons/16x16/cil-user-follow.png)", True)
+        UIFunctions.addNewMenu(self, "BÁO CÁO", "btn_widgets", "url(:/16x16/icons/16x16/cil-equalizer.png)", False)
 
         # START MENU => SELECTION
         UIFunctions.selectStandardMenu(self, "btn_human")
@@ -185,17 +185,17 @@ class MainWindow(QMainWindow):
             UIFunctions.labelPage(self, "human")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-        if btnWidget.objectName() == "btn_vehicles":
-            self.ui.stackedWidget.setCurrentWidget(self.ui.page_vehicles)
-            UIFunctions.resetStyle(self, "btn_vehicles")
-            UIFunctions.labelPage(self, "vehicles")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+        # if btnWidget.objectName() == "btn_vehicles":
+        #     self.ui.stackedWidget.setCurrentWidget(self.ui.page_vehicles)
+        #     UIFunctions.resetStyle(self, "btn_vehicles")
+        #     UIFunctions.labelPage(self, "vehicles")
+        #     btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # PAGE NEW USER
         if btnWidget.objectName() == "btn_new_user":
             self.ui.stackedWidget.setCurrentWidget(self.ui.add_user)
             UIFunctions.resetStyle(self, "btn_new_user")
-            UIFunctions.labelPage(self, "New User")
+            UIFunctions.labelPage(self, "ĐỐI TƯỢNG")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
   
 
@@ -203,7 +203,7 @@ class MainWindow(QMainWindow):
         if btnWidget.objectName() == "btn_widgets":
             self.ui.stackedWidget.setCurrentWidget(self.ui.page_widgets)
             UIFunctions.resetStyle(self, "btn_widgets")
-            UIFunctions.labelPage(self, "Report")
+            UIFunctions.labelPage(self, "BÁO CÁO")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
     ## EVENT ==> MOUSE DOUBLE CLICK

@@ -11,7 +11,7 @@ from page_report_view import PAGEREPORT
 from server.reports.services import get_videos_path_db
 
 
-column_ratios = [0.2, 0.2, 0.3, 0.3]
+column_ratios = [0.1, 0.1, 0.3, 0.3, 0.2]
 
 class PAGEWIDGET(QWidget):
         def __init__(self):
@@ -27,7 +27,10 @@ class PAGEWIDGET(QWidget):
                 self.verticalLayout_6.setObjectName(u"verticalLayout_6")
 
                 # Create a group box for the filter controls
+                font = QFont("Segoe UI", 15)
+                font.setBold(True)
                 self.filter_groupbox = QGroupBox("Lọc dữ liệu", self)
+                self.filter_groupbox.setFont(font)
                 self.filter_groupbox.setObjectName(u"filter_groupbox")
 
                 # Create a layout for the filter group box
@@ -102,8 +105,8 @@ class PAGEWIDGET(QWidget):
                 self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
                 self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
                 self.tableWidget = QTableWidget(self.frame_3)
-                if (self.tableWidget.columnCount() < 4):
-                        self.tableWidget.setColumnCount(4)
+                if (self.tableWidget.columnCount() < 5):
+                        self.tableWidget.setColumnCount(5)
                         __qtablewidgetitem = QTableWidgetItem()
                         self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
                         __qtablewidgetitem1 = QTableWidgetItem()
@@ -112,6 +115,9 @@ class PAGEWIDGET(QWidget):
                         self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
                         __qtablewidgetitem3 = QTableWidgetItem()
                         self.tableWidget.setHorizontalHeaderItem(3, __qtablewidgetitem3)
+                        __qtablewidgetitem4 = QTableWidgetItem()
+                        self.tableWidget.setHorizontalHeaderItem(4, __qtablewidgetitem4)
+
                 if (self.tableWidget.rowCount() < 16):
                         self.tableWidget.setRowCount(16)
                         font2 = QFont()
@@ -246,7 +252,9 @@ class PAGEWIDGET(QWidget):
                         ___qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
                         ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Path Video", None));
                         ___qtablewidgetitem3 = self.tableWidget.horizontalHeaderItem(3)
-                        ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"Thời gian", None));
+                        ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"Thời gian bắt đầu", None));
+                        ___qtablewidgetitem4 = self.tableWidget.horizontalHeaderItem(4)
+                        ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"Thời gian upload", None));
                         self.get_list_path_video()
 
         def convert_timestamp_to_datetime(self,timestamp):
@@ -274,13 +282,13 @@ class PAGEWIDGET(QWidget):
                         self.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
                         self.tableWidget.setItem(i, 1, QTableWidgetItem(str(path_video.id)))
                         self.tableWidget.setItem(i, 2, QTableWidgetItem(str(path_video.path)))
-                        self.tableWidget.setItem(i, 3, QTableWidgetItem(str(self.convert_timestamp_to_datetime(path_video.time))))
+                        self.tableWidget.setItem(i, 3, QTableWidgetItem(str(self.convert_timestamp_to_datetime(path_video.start_time))))
+                        self.tableWidget.setItem(i, 4, QTableWidgetItem(str(self.convert_timestamp_to_datetime(path_video.time))))
                 return list_path_video
         
         def on_row_selected(self):
                 selected_rows = self.tableWidget.selectionModel().selectedRows()
                 if selected_rows:
-                        selected_data = []
                         for index in selected_rows:
                                 item = self.tableWidget.item(index.row(), 1)
                                 item_time = self.tableWidget.item(index.row(), 3)
@@ -289,12 +297,13 @@ class PAGEWIDGET(QWidget):
                                 video_id = int(item.text())
                                 # Fomat datetime
                                 time = (item_time.text())
-                                page_report = PAGEREPORT(video_id, time, self.analyzer)
+                                path_video = self.tableWidget.item(index.row(), 2).text()
+                                page_report = PAGEREPORT(video_id, time, self.analyzer, path_video)
                                 page_report.exec_()
           
         def resizeEvent(self,event):
                 screen_width = event.size().width()
                 column_widths = [int(ratio * screen_width) for ratio in column_ratios]
-                for i in range(4):
+                for i in range(5):
                         self.tableWidget.setColumnWidth(i, column_widths[i])
                 super().resizeEvent(event)

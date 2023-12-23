@@ -38,8 +38,9 @@ class CameraWorkerSignals(QObject):
     updateUI = Signal(list) 
 
 class SubVideoAnalyze(QRunnable):
-    def __init__(self):
+    def __init__(self, time_start):
         super().__init__()
+        self.time_start = time_start
         self.face_analyzer = FaceAnalysisInsightFace()
         self.predictor = Predictor()
         
@@ -418,10 +419,8 @@ class SubVideoAnalyze(QRunnable):
                     cv2.imwrite(path_image, image_save)
                     person_model.list_image_path.append(path_image)
 
-                    current_time_seconds = self.index_frame
-                    current_time_timedelta = timedelta(seconds=current_time_seconds)
-                    formatted_time = str(current_time_timedelta)
-
+                    current_time_seconds = self.index_frame + self.time_start*5
+                
                     person_model.time = int(current_time_seconds)
                     self.list_person_model.append(person_model)
                     self.list_total_id.append(guid)
@@ -553,6 +552,7 @@ class CameraWidget(QWidget):
     def __init__(self, index,parent=None):
         super(CameraWidget, self).__init__(parent)
         self.path = None
+        self.time = None
         self.path_origin = None
         self.thread_pool = parent.thread_pool
         self.list_camera_screen = parent.list_camera_screen
@@ -568,9 +568,8 @@ class CameraWidget(QWidget):
         self.camera_label.setStyleSheet("border: 2px solid red;")
         self.camera_label.setAlignment(Qt.AlignCenter)
         self.setLayout(self.camera_layout)
-
     def start_camera(self):
-        self.worker = SubVideoAnalyze()
+        self.worker = SubVideoAnalyze(self.time)
         self.worker.init_path(self.path, self.path_origin)
         self.worker.signals.result.connect(self.display_image)
         # self.worker.signals.updateUI.connect(self.update_ui)
@@ -595,9 +594,14 @@ class CameraWidget(QWidget):
         # del self.list_camera_screen[self.path]
 
     def display_image(self, frame):
+        font = QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+
         # Display the captured frame
         if frame is None:
-            self.camera_label.setText("No frame")
+            self.camera_label.setText("Hoàn thành")
+            self.camera_label.setFont(font)
             return
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # h, w, ch = frame.shape
@@ -608,7 +612,8 @@ class CameraWidget(QWidget):
         # check camera_label attribute camerawidget
         if self.camera_label:
             # self.camera_label.setPixmap(scaled_pixmap)
-            self.camera_label.setText(f"Percent: {frame}%")
+            self.camera_label.setText(f"Loading: {frame}%")
+            self.camera_label.setFont(font)
 
     # def update_ui(self, list_image_label):
     #     try:

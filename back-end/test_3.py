@@ -1,37 +1,19 @@
-import sys
-from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QDateTimeEdit, QPushButton
+from PyQt5.QtCore import QDateTime, Qt, QTimer
 
-class DateTimePickerApp(QWidget):
-    def __init__(self):
-        super().__init__()
+def add_seconds_to_date(time_string, seconds_to_add):
+    # Chuyển đổi chuỗi thời gian thành QDateTime
+    start_date = QDateTime.fromString(time_string, Qt.ISODate)
 
-        self.init_ui()
+    # Thêm số giây vào start_date
+    target_date = start_date.addSecs(seconds_to_add)
 
-    def init_ui(self):
-        # Tạo ô nhập ngày giờ
-        self.datetime_edit = QDateTimeEdit(self)
-        self.datetime_edit.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
+    # Trả về target_date dưới dạng chuỗi ISODate
+    return target_date.toString(Qt.ISODate)
 
-        # Tạo nút để in ra ngày giờ được chọn
-        btn_get_datetime = QPushButton("Get Date and Time", self)
-        btn_get_datetime.clicked.connect(self.get_selected_datetime)
+# Sử dụng hàm
+start_time = "2023-12-23T12:00:00"  # Thay thế bằng giá trị thời gian thực tế
+seconds_to_add = 3600  # Thay thế bằng số giây muốn thêm
 
-        # Sắp xếp layout
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.datetime_edit)
-        layout.addWidget(btn_get_datetime)
-
-        self.setLayout(layout)
-
-        self.setWindowTitle('Date and Time Picker')
-        self.setGeometry(300, 300, 400, 150)
-
-    def get_selected_datetime(self):
-        selected_datetime = self.datetime_edit.dateTime()
-        print("Selected date and time:", selected_datetime.toString("yyyy-MM-dd HH:mm:ss"))
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = DateTimePickerApp()
-    window.show()
-    sys.exit(app.exec_())
+result = add_seconds_to_date(start_time, seconds_to_add)
+print("Start Date:", start_time)
+print("Target Date:", result)

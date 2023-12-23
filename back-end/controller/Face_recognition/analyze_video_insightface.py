@@ -24,7 +24,6 @@ from config import DEVICE, WEIGHT_FOLDER, DATASET_PEOPLE_FOLDER
 from unidecode import unidecode
 
 from controller.mask_detection.mask_analyze import MaskDetector
-from controller.mivolo.predictor import Predictor
 from PySide2.QtCore import QThread
 
 onnxruntime.set_default_logger_severity(3)
@@ -48,7 +47,6 @@ class FaceAnalysisInsightFace:
         self.representations = self.load_db_from_folder()
         mask_model_path = os.path.join(WEIGHT_FOLDER, "mask_model/Res18oneFC_model.pth")
         self.mask_analyze = MaskDetector(mask_model_path)
-        self.person_analyze = Predictor()
         checkpoint_age_gender_model = os.path.join(WEIGHT_FOLDER, "model_imdb_age_gender_4.22.pth.tar")
         self.age_gender_model = MiVOLO(checkpoint_age_gender_model,device,half=True,use_persons=False,disable_faces=False,verbose=False)
         self.index_frame = 0

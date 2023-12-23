@@ -23,7 +23,7 @@ reid = ReIDDetectMultiBackend(
     weights=Path(os.path.join(WEIGHT_FOLDER,'osnet_ain_x1_0_msmt17.pt')),
     device=device
 )
-
+date_time_format = "yyyy-MM-dd hh:mm:ss"
 model = YOLO('models/yolov8m.pt')
 model.to(device)
 # Check torch cuda
@@ -58,7 +58,7 @@ class FilterThread(QThread):
                                 self.report.counter = round(i / len(self.report.list_reports_filter) * 100)
                                 self.report.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
                                 if 'random' in report['person_name']:
-                                        name = "Người lạ"
+                                        name = "Người không xác định"
                                 else:
                                         name = report['person_name']
                                 self.report.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
@@ -91,7 +91,10 @@ class FilterThread(QThread):
                                         item.setData(Qt.DecorationRole, pixmap_color)
                                         self.report.tableWidget.setItem(i, 5, item)
                                 
-                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(int(int(report['time'])/5))))
+                                time_start = QDateTime.fromString(self.report.time, date_time_format)
+                                time_target = time_start.addSecs(int(int(report['time'])/5))
+                                time_string = time_target.toString(date_time_format)
+                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
                                 if len(report['images']) > 0:
                                         image_path = report['images'][0]['path']
                                         pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
@@ -211,7 +214,7 @@ class ImportThread(QThread):
                         if len(report['images']) > 0:
                                 self.report.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
                                 if 'random' in report['person_name']:
-                                        name = "Người lạ"
+                                        name = "Người không xác định"
                                 else:
                                         name = report['person_name']
                                 self.report.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
@@ -244,7 +247,10 @@ class ImportThread(QThread):
                                         item.setData(Qt.DecorationRole, pixmap_color)
                                         self.report.tableWidget.setItem(i, 5, item)
                                 
-                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(int(int(report['time'])/5))))
+                                time_start = QDateTime.fromString(self.report.time, date_time_format)
+                                time_target = time_start.addSecs(int(int(report['time'])/5))
+                                time_string = time_target.toString(date_time_format)
+                                self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
                                 if len(report['images']) > 0:
                                         image_path = report['images'][0]['path']
 

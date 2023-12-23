@@ -9,11 +9,11 @@ videos_schema = VideosSchema(many=True)
 reports_schema = ReportsSchema(many=True)
 images_schema = ImagesSchema(many=True)
 
-def add_video_service(path):
+def add_video_service(path, start_time):
   session = db_session()
   try:
     t = int(datetime.now().timestamp())
-    video = Video(path, t)
+    video = Video(path, t, start_time)
     session.add(video)
   
   except Exception as e:

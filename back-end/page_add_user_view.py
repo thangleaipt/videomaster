@@ -5,20 +5,17 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter,QPixmap,QImage,
     QRadialGradient)
 
-from PyQt5.QtCore import QTimer
 from PySide2.QtWidgets import *
 
 import cv2
 
 class PAGEADDUSER(QWidget):
-    def __init__(self,page_video, page_image):
+    def __init__(self):
         super().__init__()
         self.selected_labels = []
         self.selected_labels_2 = []
         self.upload_image = None
         self.analyzer = None
-        self.page_video = page_video
-        self.page_image = page_image
         self.setObjectName(u"page_user")
         
     def set_ui(self):
@@ -90,24 +87,24 @@ class PAGEADDUSER(QWidget):
         self.controls_layout.addWidget(self.lineLabel)
 
         # Position
-        self.linePosition = QLineEdit(self)
-        self.linePosition.setObjectName(u"lineEdit")
-        self.linePosition.setMinimumSize(QSize(0, 30))
-        self.linePosition.setMaximumSize(QSize(600, 30))
-        self.linePosition.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Đối tượng", None))
-        self.linePosition.setStyleSheet(u"QLineEdit {\n"
-            "	background-color: rgb(27, 29, 35);\n"
-            "	border-radius: 5px;\n"
-            "	border: 2px solid rgb(27, 29, 35);\n"
-            "	padding-left: 10px;\n"
-            "}\n"
-            "QLineEdit:hover {\n"
-            "	border: 2px solid rgb(64, 71, 88);\n"
-            "}\n"
-            "QLineEdit:focus {\n"
-            "	border: 2px solid rgb(91, 101, 124);\n"
-            "}")
-        self.controls_layout.addWidget(self.linePosition)
+        # self.linePosition = QLineEdit(self)
+        # self.linePosition.setObjectName(u"lineEdit")
+        # self.linePosition.setMinimumSize(QSize(0, 30))
+        # self.linePosition.setMaximumSize(QSize(600, 30))
+        # self.linePosition.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Đối tượng", None))
+        # self.linePosition.setStyleSheet(u"QLineEdit {\n"
+        #     "	background-color: rgb(27, 29, 35);\n"
+        #     "	border-radius: 5px;\n"
+        #     "	border: 2px solid rgb(27, 29, 35);\n"
+        #     "	padding-left: 10px;\n"
+        #     "}\n"
+        #     "QLineEdit:hover {\n"
+        #     "	border: 2px solid rgb(64, 71, 88);\n"
+        #     "}\n"
+        #     "QLineEdit:focus {\n"
+        #     "	border: 2px solid rgb(91, 101, 124);\n"
+        #     "}")
+        # self.controls_layout.addWidget(self.linePosition)
 
         # Button add user
         self.addButton = QPushButton(self)
@@ -263,10 +260,6 @@ class PAGEADDUSER(QWidget):
             label.deleteLater()  
             self.selected_labels[i].deleteLater()
             self.analyzer.delete(self.selected_labels[i].text())
-            for key, value in self.page_video.list_camera_screen.items():
-                value.worker.face_analyzer.load_db_from_folder()
-            for key, value in self.page_image.list_camera_screen.items():
-                value.worker.face_analyzer.load_db_from_folder()
         self.selected_labels = [] 
         self.selected_labels_2 = [] 
         self.deleteButton.setEnabled(False)
@@ -276,19 +269,18 @@ class PAGEADDUSER(QWidget):
     def add_label_images(self):
         try:
             cur_label = self.lineLabel.text()
-            cur_position = self.linePosition.text()
+            # cur_position = self.linePosition.text()
+            cur_position = ""
             img = self.upload_image
             if not cur_label:
                 print("empty label")
                 return
             # for i in range(len(self.selected_labels)):
             self.analyzer.train(img,cur_label,cur_position)
-            for key, value in self.page_video.list_camera_screen.items():
-                value.worker.face_analyzer.load_db_from_folder()
             # reset image
             self.camera_labels[0].setPixmap(QPixmap())
             self.lineLabel.setText("")
-            self.linePosition.setText("")
+            # self.linePosition.setText("")
             self.update_ui()
             QMessageBox.information(self, "Hoàn thành", f"{cur_label} đã được thêm vào hệ thống!")
 
@@ -302,7 +294,7 @@ class PAGEADDUSER(QWidget):
         self.deleteButton.setFixedSize(int(self.newsize.width()/10* 2), int(self.newsize.height()/20))
         self.addButton.setFixedSize(int(self.newsize.width()/10* 2), int(self.newsize.height()/20))
         self.lineLabel.setFixedSize(int(self.newsize.width()/10* 2), int(self.newsize.height()/20))
-        self.linePosition.setFixedSize(int(self.newsize.width()/10* 2), int(self.newsize.height()/20))
+        # self.linePosition.setFixedSize(int(self.newsize.width()/10* 2), int(self.newsize.height()/20))
 
                               
 

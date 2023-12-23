@@ -62,10 +62,12 @@ class Video(db.Model):
   id = Column(INTEGER, primary_key=True, autoincrement=True)
   path = Column(NVARCHAR(255), nullable=False)
   time = Column(INTEGER, nullable=False)
+  start_time = Column(INTEGER, nullable=False)
 
-  def __init__(self, path, time):
+  def __init__(self, path, time, start_time):
     self.path = path
     self.time = time
+    self.start_time = start_time
 
 class Report(db.Model):
   __tablename__ = "Reports"
