@@ -97,7 +97,7 @@ def get_videos_path_db(page_num, page_size, start_time, end_time):
   finally:
     session.close()
 
-def add_report_service(path_video, person_name, age, gender, mask, code_color, time, images_path, is_front): 
+def add_report_service(path_video, person_name, age, gender, mask, code_color, time, images_path, is_front, real_time): 
   session = db_session()
 
   try:
@@ -105,15 +105,15 @@ def add_report_service(path_video, person_name, age, gender, mask, code_color, t
     video_id = session.query(Video).filter(Video.path == str(path_video)).order_by(desc(Video.time)).first().id
     
     # add report
-    report = Report(person_name, age, gender, mask, code_color, time, video_id, is_front)
+    report = Report(person_name, age, gender, mask, code_color, time, video_id, is_front, real_time)
     session.add(report)
     
     # report_id
     report_id = session.query(Report).filter(and_(
       Report.person_name == person_name, 
-      Report.time == time
+      Report.real_time == real_time
     )).first().id
-    print(f"Report id: {report_id} - {person_name} - {images_path}")
+    print(f"Report id: {report_id} - {video_id} - {len(images_path)}")
     # add images for report
     for path in images_path:
       report_image = ReportImage(path, report_id)

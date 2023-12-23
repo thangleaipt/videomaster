@@ -102,6 +102,7 @@ class FilterThread(QThread):
                                 self.report.tableWidget.setItem(i, 7, item)
 
                                 self.report.tableWidget.setRowHeight(i, pixmap.height())
+                                print(pixmap.height())
 
                                 self.report.tableWidget.setColumnWidth(4, pixmap.width() + 20)
 

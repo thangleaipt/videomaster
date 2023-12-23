@@ -81,8 +81,9 @@ class Report(db.Model):
   time = Column(INTEGER, nullable=False)
   video_id = Column(INTEGER, ForeignKey(Video.id), nullable=False)
   isface = Column(INTEGER, nullable=True)
+  real_time = Column(INTEGER, nullable=True)
 
-  def __init__(self, person_name, age, gender, mask, code_color, time, video_id, isface):
+  def __init__(self, person_name, age, gender, mask, code_color, time, video_id, isface, real_time):
     self.person_name = person_name
     self.age = age
     self.gender = gender
@@ -91,6 +92,7 @@ class Report(db.Model):
     self.time = time
     self.video_id = video_id
     self.isface = isface
+    self.real_time = real_time
 
 class ReportImage(db.Model):
   __tablename__ = "ReportImages"

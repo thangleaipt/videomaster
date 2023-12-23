@@ -423,6 +423,7 @@ class SubVideoAnalyze(QRunnable):
                     current_time_seconds = self.index_frame + self.time_start*5
                 
                     person_model.time = int(current_time_seconds)
+                    person_model.real_time = int(time.time())
                     self.list_person_model.append(person_model)
                     self.list_total_id.append(guid)
                 else:
@@ -547,7 +548,7 @@ class SubVideoAnalyze(QRunnable):
                     person_name = person_model.label_name
                 if person_model.face_image is not None:
                     person_model.is_front = 1
-                add_report_service(self.video_path_report, person_name, age, gender, mask, main_color_clothes, time_model, person_model.list_image_path, person_model.is_front)
+                add_report_service(self.video_path_report, person_name, age, gender, mask, main_color_clothes, time_model, person_model.list_image_path, person_model.is_front, person_model.real_time)
         except Exception as e:
             print(f'[{datetime.now().strftime(DATETIME_FORMAT)}][analyze][send_report_to_db]: {e}')
 class CameraWidget(QWidget):

@@ -518,7 +518,11 @@ class PAGEREPORT(QWidget):
                         isface = None
                 self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
                 print(f"Length list_reports: {len(self.list_reports)}")
-                self.list_reports_filter = self.list_reports
+                for report in self.list_reports:
+                        if len(report['images']) > 0:
+                                self.list_reports_filter.append(report)
+                        else:
+                                print(f"Remove report: {report}")
 
         def filter_report(self):
                 self.get_list_report()

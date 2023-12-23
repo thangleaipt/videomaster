@@ -30,6 +30,7 @@ class PersonModel:
         self.is_front = 0
         self.list_feature = []
         self.score_face = 0
+        self.real_time = 0
 
 
     def to_json(self):
