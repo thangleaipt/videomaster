@@ -1,5 +1,6 @@
 from datetime import datetime, timezone, timedelta
 import os
+import subprocess
 import time
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
     QRect, QSize, QUrl, Qt, QDateTime, QTime)
@@ -20,6 +21,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from page_loading_view import LoadingScreen
+from PIL import Image
 
 
 column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
@@ -85,8 +87,8 @@ class PAGEIMAGEVIEW(QDialog):
 
                 cv2.destroyAllWindows()
                 video.release()
-        
-class PAGEREPORT(QWidget):
+
+class PAGEREPORT(QDialog):
         def __init__(self, index, time, analyzer, path_video):
                 super().__init__()
                 self.list_reports_filter = []
@@ -97,8 +99,8 @@ class PAGEREPORT(QWidget):
                 self.analyzer = analyzer
                 self.path_video = path_video
                 self.setMinimumSize(QSize(800, 600))
-                # self.setWindowFlags()
-                # self.setWindowModality(Qt.ApplicationModal)
+                screen_size = QApplication.primaryScreen().availableSize()
+                self.resize(screen_size)
                 self.set_ui()
                 self.retranslateUi()
                 self.setWindowTitle(f"{self.path_video}_{time}")
@@ -125,9 +127,10 @@ class PAGEREPORT(QWidget):
                 self.date_time_layout = QHBoxLayout()
 
                 # Add date-time edit controls to the filter layout
-                start_label = QLabel("Start Time:", self.filter_groupbox)
-                self.date_time_layout.addWidget(start_label)
-                self.date_time_layout.addSpacing(2)
+                self.date_time_start_layout = QHBoxLayout()
+                start_label = QLabel("Bắt đầu:", self.filter_groupbox)
+                self.date_time_start_layout.addWidget(start_label)
+                self.date_time_start_layout.addSpacing(2)
                 self.dateTimeEdit_start = QDateTimeEdit(self.filter_groupbox)
                 self.dateTimeEdit_start.setObjectName(u"dateTimeEdit_start")
                 self.dateTimeEdit_start.setFixedSize(150, 50)
@@ -136,12 +139,14 @@ class PAGEREPORT(QWidget):
                 start_date.setTime(QTime(0, 0, 0))
                 self.dateTimeEdit_start.setDateTime(start_date)
                 
-                self.date_time_layout.addWidget(self.dateTimeEdit_start)
-                self.date_time_layout.addSpacing(20)
+                self.date_time_start_layout.addWidget(self.dateTimeEdit_start)
+                self.date_time_start_layout.addSpacing(20)
+                self.date_time_layout.addLayout(self.date_time_start_layout)
 
-                end_label = QLabel("End Time:", self.filter_groupbox)
-                self.date_time_layout.addWidget(end_label)
-                self.date_time_layout.addSpacing(2)
+                self.date_time_end_layout = QHBoxLayout()
+                end_label = QLabel("Kết thúc:", self.filter_groupbox)
+                self.date_time_end_layout.addWidget(end_label)
+                self.date_time_end_layout.addSpacing(2)
                 self.dateTimeEdit_end = QDateTimeEdit(self.filter_groupbox)
                 self.dateTimeEdit_end.setObjectName(u"dateTimeEdit_end")
                 self.dateTimeEdit_end.setFixedSize(150, 50)
@@ -149,7 +154,8 @@ class PAGEREPORT(QWidget):
                 end_date = QDateTime.fromString(self.time, date_time_format)
                 end_date.setTime(QTime(0, 0, 0))
                 self.dateTimeEdit_end.setDateTime(end_date)
-                self.date_time_layout.addWidget(self.dateTimeEdit_end)
+                self.date_time_end_layout.addWidget(self.dateTimeEdit_end)
+                self.date_time_layout.addLayout(self.date_time_end_layout)
 
                 self.filter_layout.addLayout(self.date_time_layout)
                 self.filter_layout.addSpacing(50)
@@ -473,7 +479,7 @@ class PAGEREPORT(QWidget):
                         ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"Ảnh", None));
                         ___qtablewidgetitem7.setTextColor(QColor(255, 255, 255))
                         ___qtablewidgetitem7.setFont(font)
-                        self.filter_report()
+
 
         def get_list_report(self):
                 # Get the Unix timestamp from self.dateTimeEdit_start
@@ -526,8 +532,8 @@ class PAGEREPORT(QWidget):
 
         def filter_report(self):
                 self.get_list_report()
-                loading_screen = LoadingScreen(self)
-                loading_screen.filter_loading()
+                self.fill_report()
+                self.show()
 
         def convert_timestamp_to_datetime(self,timestamp):
                 dt_utc = datetime.utcfromtimestamp(timestamp)
@@ -540,68 +546,64 @@ class PAGEREPORT(QWidget):
                 
                 return dt_vietnam_str
 
-        # def fill_report(self):
-        #         if len(self.list_reports_filter) >= 16:
-        #                 self.tableWidget.setRowCount(len(self.list_reports_filter))
-        #         else:
-        #                 if len(self.list_reports_filter) == 0:
-        #                         QMessageBox.information(self, "Notification", "Không tìm thấy kết quả.")
-        #                 self.tableWidget.setRowCount(16)
-        #         self.tableWidget.clearContents()
+        def fill_report(self):
+                if len(self.list_reports_filter) >= 16:
+                        self.tableWidget.setRowCount(len(self.list_reports_filter))
+                else:
+                        self.tableWidget.setRowCount(16)
+                self.tableWidget.clearContents()
 
-        #         screen_width = QDesktopWidget().screenGeometry().width()
-        #         column_widths = [int(ratio * screen_width) for ratio in column_ratios]
-        #         for i in range(8):
-        #                 self.tableWidget.setColumnWidth(i, column_widths[i])
-        #         for i, report in enumerate(self.list_reports_filter):
-        #                 self.counter = round(i / len(self.list_reports_filter) * 100)
-        #                 self.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
-        #                 if 'random' in report['person_name']:
-        #                         name = "Người lạ"
-        #                 else:
-        #                         name = report['person_name']
-        #                 self.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
-        #                 self.tableWidget.setItem(i, 2, QTableWidgetItem(str(report['age'])))
-        #                 if report['gender'] == 1:
-        #                         gender = "Nam"
-        #                 elif report['gender'] == 0:
-        #                         gender = "Nữ"
-        #                 else:
-        #                         gender = "Không xác định"
-        #                 self.tableWidget.setItem(i, 3, QTableWidgetItem(str(gender)))
-        #                 if report['mask'] == 1:
-        #                        mask = "Có"
-        #                 elif report['mask'] == 0:
-        #                         mask = "Không"
-        #                 self.tableWidget.setItem(i, 4, QTableWidgetItem(str(mask)))
-        #                 if report['code_color'] is None:
-        #                         color = "Không xác định"
-        #                         self.tableWidget.setItem(i, 5, QTableWidgetItem(str(color)))
-        #                 else:
-        #                         color = report['code_color']
-        #                         numbers = [int(num) for num in color.split(',')]
-        #                         image_color = Image.new('RGB', (128, 128), (numbers[0], numbers[1], numbers[2]))
-        #                         image_pil = image_color.tobytes()
-        #                         q_image = QImage(image_pil, image_color.width, image_color.height, QImage.Format_RGB888)
+                screen_width = QDesktopWidget().screenGeometry().width()
+                column_widths = [int(ratio * screen_width) for ratio in column_ratios]
+                for i in range(8):
+                        self.tableWidget.setColumnWidth(i, column_widths[i])
+                for i, report in enumerate(self.list_reports_filter):
+                        self.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
+                        if 'random' in report['person_name']:
+                                name = "Người không xác định"
+                        else:
+                                name = report['person_name']
+                        self.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
+                        self.tableWidget.setItem(i, 2, QTableWidgetItem(str(report['age'])))
+                        if report['gender'] == 1:
+                                gender = "Nam"
+                        elif report['gender'] == 0:
+                                gender = "Nữ"
+                        else:
+                                gender = "Không xác định"
+                        self.tableWidget.setItem(i, 3, QTableWidgetItem(str(gender)))
+                        if report['mask'] == 1:
+                                mask = "Có"
+                        elif report['mask'] == 0:
+                                mask = "Không"
+                        self.tableWidget.setItem(i, 4, QTableWidgetItem(str(mask)))
+                        if report['code_color'] is None:
+                                color = "Không xác định"
+                                self.tableWidget.setItem(i, 5, QTableWidgetItem(str(color)))
+                        else:
+                                color = report['code_color']
+                                numbers = [int(num) for num in color.split(',')]
+                                image_color = Image.new('RGB', (128, 128), (numbers[0], numbers[1], numbers[2]))
+                                image_pil = image_color.tobytes()
+                                q_image = QImage(image_pil, image_color.width, image_color.height, QImage.Format_RGB888)
 
-        #                         # Tạo QPixmap từ QImage
-        #                         pixmap_color = QPixmap.fromImage(q_image)
-        #                         item = QTableWidgetItem()
-        #                         item.setData(Qt.DecorationRole, pixmap_color)
-        #                         self.tableWidget.setItem(i, 5, item)
+                                # Tạo QPixmap từ QImage
+                                pixmap_color = QPixmap.fromImage(q_image)
+                                item = QTableWidgetItem()
+                                item.setData(Qt.DecorationRole, pixmap_color)
+                                self.tableWidget.setItem(i, 5, item)
                         
-        #                 self.tableWidget.setItem(i, 6, QTableWidgetItem(str(self.convert_timestamp_to_datetime(report['time']))))
-        #                 if len(report['images']) > 0:
-        #                         image_path = report['images'][0]['path']
-
-        #                         pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
-        #                         item = QTableWidgetItem()
-        #                         item.setData(Qt.DecorationRole, pixmap)
-        #                         self.tableWidget.setItem(i, 7, item)
-        #                         self.tableWidget.setRowHeight(i, pixmap.height())
-        #                         self.tableWidget.setColumnWidth(4, pixmap.width() + 20)
-
-                # self.tableWidget.cellClicked.connect(self.on_row_selected)
+                        time_start = QDateTime.fromString(self.time, date_time_format)
+                        time_target = time_start.addSecs(int(int(report['time'])/5))
+                        time_string = time_target.toString(date_time_format)
+                        self.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
+                        image_path = report['images'][0]['path']
+                        pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
+                        item = QTableWidgetItem()
+                        item.setData(Qt.DecorationRole, pixmap)
+                        self.tableWidget.setItem(i, 7, item)
+                        self.tableWidget.setRowHeight(i, pixmap.height())
+                        self.tableWidget.setColumnWidth(4, pixmap.width() + 20)
 
         def on_row_selected(self):
                 selected_rows = self.tableWidget.selectionModel().selectedRows()
@@ -647,7 +649,7 @@ class PAGEREPORT(QWidget):
                         if len(self.list_file_path) > 0:
                                 loading_screen = LoadingScreen(self)
                                 loading_screen.import_loading()
-
+                               
         def create_pdf_report(self):
                 try:
                         path_dir = f"{STATIC_FOLDER}\\Documents"
@@ -669,8 +671,9 @@ class PAGEREPORT(QWidget):
                         pdf_canvas.setFont("Segoe UI Bold", 20)
                         pdf_canvas.drawString(225, 700, "BÁO CÁO NHẬN DIỆN")
                         pdf_canvas.setFont("Segoe UI Bold", 11)
-                        pdf_canvas.drawString(80, 660, f"Thời gian: {self.time}")
-                        pdf_canvas.drawString(80, 640, f"Tổng số bản ghi: {total_items}")
+                        pdf_canvas.drawString(80, 660, f"Thời gian bắt đầu Video: {self.time}")
+                        pdf_canvas.drawString(80, 640, f"Thời gian tạo PDF: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                        pdf_canvas.drawString(80, 620, f"Tổng số bản ghi: {total_items}")
                         for page_number in range(total_pages):
                                 pdf_canvas.setFont("Segoe UI", 9)
                                 # Tạo bảng
@@ -707,9 +710,13 @@ class PAGEREPORT(QWidget):
                                         elif report['mask'] == 0:
                                                 mask = "Không"
                                         if report['code_color'] is None:
-                                                color = "Không xác định"
+                                                color = None
                                         else:
                                                 color = report['code_color']
+
+                                        time_start = QDateTime.fromString(self.time, date_time_format)
+                                        time_target = time_start.addSecs(int(int(report['time'])/5))
+                                        time_string = time_target.toString(date_time_format)
 
                                         row_data = [
                                                 str(index_report),
@@ -718,7 +725,7 @@ class PAGEREPORT(QWidget):
                                                 gender,
                                                 mask,
                                                 color,
-                                                str(self.convert_timestamp_to_datetime(report['time'])),
+                                                str(time_string),
                                         ]
 
                                         table_data.append(row_data)
@@ -733,14 +740,42 @@ class PAGEREPORT(QWidget):
                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780- (0 + 3) * row_height, header)
                                         else:
                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780- (0 + 1) * row_height, header)
+                                path_color_dir = f"{STATIC_FOLDER}\\Documents\\color"
+                                if not os.path.exists(path_color_dir):
+                                        os.makedirs(path_color_dir)
                                 pdf_canvas.setFont("Segoe UI", 8)
                                 for i, row in enumerate(table_data[1:]): 
                                         for j, data in enumerate(row):
                                                 pdf_canvas.setFont("Segoe UI", 8, leading=10)
                                                 if page_number == 0:
-                                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 4) * row_height, str(data))
+                                                        if j == 5:
+                                                                if data is None:
+                                                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 4) * row_height, "Không xác định")
+                                                                else:
+                                                                        data_color = data.split(",")
+                                                                        converted_data = [int(element) for element in data_color]
+                                                                        image = Image.new("RGB", (20, 10), tuple(converted_data))
+                                                                        # Chuyển đổi ảnh thành dữ liệu bytes  
+                                                                        
+                                                                        image_path = f"{path_color_dir}\\{i}_{data}.png"
+                                                                        image.save(image_path)
+                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 4) * row_height-30, width=60, height=60)
+                                                        else: 
+                                                                pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 4) * row_height, str(data))
                                                 else:
-                                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, str(data))
+                                                        if j == 5:
+                                                                if data is None:
+                                                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, "Không xác định")
+                                                                else:
+                                                                        data_color = data.split(",")
+                                                                        converted_data = [int(element) for element in data_color]
+                                                                        image = Image.new("RGB", (20, 10), tuple(converted_data))
+                                                                        # Chuyển đổi ảnh thành dữ liệu bytes  
+                                                                        image_path = f"{path_color_dir}\\{i}_{data}.png"
+                                                                        image.save(image_path)
+                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 2) * row_height-30, width=60, height=60)
+                                                        else:
+                                                                pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, str(data))
 
                                 for i, report in enumerate(self.list_reports_filter[start_index:end_index]):
                                         if len(report.get('images', [])) > 0:
@@ -758,7 +793,15 @@ class PAGEREPORT(QWidget):
                                 pdf_canvas.showPage()
                         # Lưu file PDF
                         pdf_canvas.save()
-                        QMessageBox.information(self, "Đã lưu", "File pdf đã được lưu", QMessageBox.Ok)
+                        QMessageBox.information(self, "Đã lưu", "File pdf đã được lưu thành công", QMessageBox.Ok)
+                        if os.path.exists(file_path):
+                        # Sử dụng subprocess để mở file
+                                try:
+                                        subprocess.Popen(['start', '', file_path], shell=True)
+                                except Exception as e:
+                                        print(f"Không thể mở file: {e}")
+                        else:
+                                print("File không tồn tại")
                 except Exception as e:
                         print(f"[save_pdf]: {e}")
                         QMessageBox.warning(self, "Không thể lưu", "Không thể lưu file pdf", QMessageBox.Ok)

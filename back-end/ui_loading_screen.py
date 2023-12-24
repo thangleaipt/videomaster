@@ -122,6 +122,6 @@ class Ui_LoadingScreen(object):
         LoadingScreen.setWindowTitle(QCoreApplication.translate("LoadingScreen", u"LoadingWindow", None))
         self.title.setText(QCoreApplication.translate("LoadingScreen", u"Simple loading screen", None))
         self.loading.setText(QCoreApplication.translate("LoadingScreen", u"Loading___", None))
-        self.example.setText(QCoreApplication.translate("LoadingScreen", u"Example", None))
+        self.example.setText(QCoreApplication.translate("LoadingScreen", u"Tìm kiếm đối tượng", None))
     # retranslateUi
 

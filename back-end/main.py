@@ -18,12 +18,13 @@ import sys
 import platform
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
-from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
+from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeyEvent, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 from ui_Formlogin import Login
 # GUI FILE
 from app_modules import *
 from check_user import verify_authorization
+from server import create_db
 
 
 class LoginWindow(QMainWindow):
@@ -76,19 +77,23 @@ class LoginWindow(QMainWindow):
         print("click button close")
         self.close()
 
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
+            self.click_login()
     def click_login(self):
         print("click button login")
         user = self.ui.lineEdit_Login.text()
         password = self.ui.lineEdit_Password.text()
-        verify = verify_authorization(user, password)
-        verify = True
+        response = verify_authorization(user, password)
+        verify = response['verify_status']
+        message = response['message']
         if verify is True:
             # Hide login
             self.close()
             window = MainWindow()
-            # window.show()
+            window.show()
         else:
-            QMessageBox.warning(self, "Error", "Wrong username or password", QMessageBox.Ok)
+            QMessageBox.warning(self, "Lỗi đăng nhập", f"{message}", QMessageBox.Ok)
             
 
     def mousePressEvent(self, event):
@@ -254,6 +259,7 @@ def init_app():
     app = QApplication(sys.argv)
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
+    create_db()
     login_window = LoginWindow()
     sys.exit(app.exec_())
 

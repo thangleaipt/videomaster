@@ -29,86 +29,85 @@ model.to(device)
 # Check torch cuda
 print(f"Is CUDA available: {torch.cuda.is_available()}")
 
-class FilterThread(QThread):
-    finished = Signal()
-    progress_update = Signal(int)
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.report = parent
+# class FilterThread(QThread):
+#     finished = Signal()
+#     progress_update = Signal(int)
+#     def __init__(self):
+#         super().__init__()
 
-    def run(self):
-        self.fill_report()
-        self.finished.emit()
+#     def run(self):
+#         self.finished.emit()
     
-    def fill_report(self):
-                if len(self.report.list_reports_filter) >= 16:
-                        self.report.tableWidget.setRowCount(len(self.report.list_reports_filter))
-                else:
-                        self.report.tableWidget.setRowCount(16)
-                self.report.tableWidget.clearContents()
+#     def fill_report(self):
+#                 if len(self.report.list_reports_filter) >= 16:
+#                         self.report.tableWidget.setRowCount(len(self.report.list_reports_filter))
+#                 else:
+#                         self.report.tableWidget.setRowCount(16)
+#                 self.report.tableWidget.clearContents()
 
-                screen_width = QDesktopWidget().screenGeometry().width()
-                column_widths = [int(ratio * screen_width) for ratio in column_ratios]
-                for i in range(8):
-                        self.report.tableWidget.setColumnWidth(i, column_widths[i])
-                for i, report in enumerate(self.report.list_reports_filter):
-                        print(f"Counter: {self.report.counter}")
-                        self.progress_update.emit(self.report.counter)
-                        self.report.counter = round(i / len(self.report.list_reports_filter) * 100)
-                        self.report.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
-                        if 'random' in report['person_name']:
-                                name = "Người không xác định"
-                        else:
-                                name = report['person_name']
-                        self.report.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
-                        self.report.tableWidget.setItem(i, 2, QTableWidgetItem(str(report['age'])))
-                        if report['gender'] == 1:
-                                gender = "Nam"
-                        elif report['gender'] == 0:
-                                gender = "Nữ"
-                        else:
-                                gender = "Không xác định"
-                        self.report.tableWidget.setItem(i, 3, QTableWidgetItem(str(gender)))
-                        if report['mask'] == 1:
-                                mask = "Có"
-                        elif report['mask'] == 0:
-                                mask = "Không"
-                        self.report.tableWidget.setItem(i, 4, QTableWidgetItem(str(mask)))
-                        if report['code_color'] is None:
-                                color = "Không xác định"
-                                self.report.tableWidget.setItem(i, 5, QTableWidgetItem(str(color)))
-                        else:
-                                color = report['code_color']
-                                numbers = [int(num) for num in color.split(',')]
-                                image_color = Image.new('RGB', (128, 128), (numbers[0], numbers[1], numbers[2]))
-                                image_pil = image_color.tobytes()
-                                q_image = QImage(image_pil, image_color.width, image_color.height, QImage.Format_RGB888)
+#                 screen_width = QDesktopWidget().screenGeometry().width()
+#                 column_widths = [int(ratio * screen_width) for ratio in column_ratios]
+#                 for i in range(8):
+#                         self.report.tableWidget.setColumnWidth(i, column_widths[i])
+#                 for i, report in enumerate(self.report.list_reports_filter):
+#                         print(f"Counter: {self.report.counter}")
+#                         self.progress_update.emit(self.report.counter)
+#                         self.report.counter = round(i / len(self.report.list_reports_filter) * 100)
+#                         self.report.tableWidget.setItem(i, 0, QTableWidgetItem(str(i)))
+#                         if 'random' in report['person_name']:
+#                                 name = "Người không xác định"
+#                         else:
+#                                 name = report['person_name']
+#                         self.report.tableWidget.setItem(i, 1, QTableWidgetItem(str(name)))
+#                         self.report.tableWidget.setItem(i, 2, QTableWidgetItem(str(report['age'])))
+#                         if report['gender'] == 1:
+#                                 gender = "Nam"
+#                         elif report['gender'] == 0:
+#                                 gender = "Nữ"
+#                         else:
+#                                 gender = "Không xác định"
+#                         self.report.tableWidget.setItem(i, 3, QTableWidgetItem(str(gender)))
+#                         if report['mask'] == 1:
+#                                 mask = "Có"
+#                         elif report['mask'] == 0:
+#                                 mask = "Không"
+#                         self.report.tableWidget.setItem(i, 4, QTableWidgetItem(str(mask)))
+#                         if report['code_color'] is None:
+#                                 color = "Không xác định"
+#                                 self.report.tableWidget.setItem(i, 5, QTableWidgetItem(str(color)))
+#                         else:
+#                                 color = report['code_color']
+#                                 numbers = [int(num) for num in color.split(',')]
+#                                 image_color = Image.new('RGB', (128, 128), (numbers[0], numbers[1], numbers[2]))
+#                                 image_pil = image_color.tobytes()
+#                                 q_image = QImage(image_pil, image_color.width, image_color.height, QImage.Format_RGB888)
 
-                                # Tạo QPixmap từ QImage
-                                pixmap_color = QPixmap.fromImage(q_image)
-                                item = QTableWidgetItem()
-                                item.setData(Qt.DecorationRole, pixmap_color)
-                                self.report.tableWidget.setItem(i, 5, item)
+#                                 # Tạo QPixmap từ QImage
+#                                 pixmap_color = QPixmap.fromImage(q_image)
+#                                 item = QTableWidgetItem()
+#                                 item.setData(Qt.DecorationRole, pixmap_color)
+#                                 self.report.tableWidget.setItem(i, 5, item)
                         
-                        time_start = QDateTime.fromString(self.report.time, date_time_format)
-                        time_target = time_start.addSecs(int(int(report['time'])/5))
-                        time_string = time_target.toString(date_time_format)
-                        self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
-                        if len(report['images']) > 0:
-                                image_path = report['images'][0]['path']
-                                pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
-                                item = QTableWidgetItem()
-                                item.setData(Qt.DecorationRole, pixmap)
-                                self.report.tableWidget.setItem(i, 7, item)
+#                         time_start = QDateTime.fromString(self.report.time, date_time_format)
+#                         time_target = time_start.addSecs(int(int(report['time'])/5))
+#                         time_string = time_target.toString(date_time_format)
+#                         self.report.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
+#                         if len(report['images']) > 0:
+#                                 image_path = report['images'][0]['path']
+#                                 pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
+#                                 item = QTableWidgetItem()
+#                                 item.setData(Qt.DecorationRole, pixmap)
+#                                 self.report.tableWidget.setItem(i, 7, item)
 
-                                self.report.tableWidget.setRowHeight(i, pixmap.height())
-                                print(pixmap.height())
+#                                 self.report.tableWidget.setRowHeight(i, pixmap.height())
+#                                 print(pixmap.height())
 
-                                self.report.tableWidget.setColumnWidth(4, pixmap.width() + 20)
+#                                 self.report.tableWidget.setColumnWidth(4, pixmap.width() + 20)
 
 class ImportThread(QThread):
     finished = Signal()
     progress_update = Signal(int)
+    progress_signal = Signal(str)
     def __init__(self, parent=None):
         super().__init__(parent)
         self.report = parent
@@ -116,7 +115,6 @@ class ImportThread(QThread):
 
     def run(self):
         self.filter_report_query()
-        self.fill_report()
         self.finished.emit()
         
     def filter_report_query(self):
@@ -128,8 +126,10 @@ class ImportThread(QThread):
                         min_report = None
                         self.report.list_reports_filter = []
                         list_instance = self.report.analyzer.analyze_detect_face(frame_import)
-
+                        
                         if len(list_instance) > 0 and list_instance[0][1] is not None:
+                                string_update = "Tìm khuôn mặt"
+                                self.progress_signal.emit(string_update)
                                 for report in self.report.list_reports:
                                         number += 1
                                         self.counter = round(number / len(self.report.list_reports) * 100)
@@ -140,6 +140,8 @@ class ImportThread(QThread):
                                                 self.report.list_reports_filter.append(report)
                         # Unknown person and have face
                         elif len(list_instance) > 0 and list_instance[0][1] is None: 
+                                string_update = "Tìm khuôn mặt"
+                                self.progress_signal.emit(string_update)
                                 feature_image_import = self.report.analyzer.get_feature(frame_import)[0]
                                 for report in self.report.list_reports:
                                         number += 1
@@ -161,14 +163,16 @@ class ImportThread(QThread):
                                                         similarity = self.report.analyzer.rec.compute_sim(feature_image_import, feature_ref[0])
                                                 else:
                                                         similarity = 0
-                                                if similarity > 0.43:
+                                                if similarity > 0.3:
                                                         max_report = report
                                                         break
                                                 
                                         if max_report is not None and max_report not in self.report.list_reports_filter:             
                                                 self.report.list_reports_filter.append(max_report)
-                                                print("Max report: ", max_report['person_name'])
+                                                print(f"Tìm khuôn mặt: {max_report['person_name']} - {self.counter}%")
                         if len(list_instance) == 0 or len(self.report.list_reports_filter) >= 0:
+                                string_update = "Tìm dáng người"
+                                self.progress_signal.emit(string_update)
                                 h_import,w1_import,_ = frame_import.shape
                                 xyxys_import =  np.array([[0,0,w1_import,h_import]])
                                 feature_image_import = reid.get_features(xyxys_import,frame_import)[0]
@@ -197,7 +201,7 @@ class ImportThread(QThread):
                                                                 
                                                 if min_report is not None and min_report not in self.report.list_reports_filter:             
                                                         self.report.list_reports_filter.append(min_report)
-                                                        print("Min report: ", min_report['person_name'])
+                                                        print(f"Tìm dáng người: {min_report['person_name']} - {self.counter}%")
 
     def fill_report(self):
                 if len(self.report.list_reports_filter) >= 16:
@@ -284,22 +288,27 @@ class LoadingScreen(QMainWindow):
         self.progress.show()
         self.show()
 
-    def filter_loading(self):
-        self.loading_thread = FilterThread(self.report)
-        self.loading_thread.finished.connect(self.loading_finished)
-        self.loading_thread.progress_update.connect(self.update_progress)
-        self.loading_thread.start()
+#     def filter_loading(self):
+#         self.loading_thread = FilterThread()
+#         self.loading_thread.finished.connect(self.loading_finished)
+#         self.loading_thread.progress_update.connect(self.update_progress)
+#         self.loading_thread.start()
     
     def import_loading(self):
         self.loading_thread = ImportThread(self.report)
         self.loading_thread.finished.connect(self.loading_finished)
         self.loading_thread.progress_update.connect(self.update_progress)
+        self.loading_thread.progress_signal.connect(self.update_signal)
         self.loading_thread.start()
 
     def update_progress(self, value):
         self.progress.set_value(value)
 
+    def update_signal(self, string):
+           self.ui.title.setText(QCoreApplication.translate("LoadingScreen", f"{string}", None))
     def loading_finished(self):
         self.close()
-        self.report.show()
+        self.loading_thread.fill_report()
+
+
 

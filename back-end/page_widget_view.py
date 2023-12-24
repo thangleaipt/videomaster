@@ -40,9 +40,10 @@ class PAGEWIDGET(QWidget):
                 self.date_time_layout = QHBoxLayout(self)
 
                 # Add date-time edit controls to the filter layout
-                start_label = QLabel("Start Date:", self.filter_groupbox)
-                self.date_time_layout.addWidget(start_label)
-                self.date_time_layout.addSpacing(2)
+                self.date_time_start_layout = QHBoxLayout()
+                start_label = QLabel("Bắt đầu:", self.filter_groupbox)
+                self.date_time_start_layout.addWidget(start_label)
+                self.date_time_start_layout.addSpacing(2)
                 self.dateTimeEdit_start = QDateTimeEdit(self.filter_groupbox)
                 self.dateTimeEdit_start.setObjectName(u"dateTimeEdit_start")
                 self.dateTimeEdit_start.setFixedSize(200, 50)
@@ -50,12 +51,14 @@ class PAGEWIDGET(QWidget):
                 start_date = QDateTime.currentDateTime()
                 start_date.setTime(QTime(0, 0, 0))
                 self.dateTimeEdit_start.setDateTime(start_date)
-                self.date_time_layout.addWidget(self.dateTimeEdit_start)
+                self.date_time_start_layout.addWidget(self.dateTimeEdit_start)
+                self.date_time_layout.addLayout(self.date_time_start_layout)
                 self.date_time_layout.addSpacing(20)
 
-                end_label = QLabel("End Date:", self.filter_groupbox)
-                self.date_time_layout.addWidget(end_label)
-                self.date_time_layout.addSpacing(2)
+                self.date_time_end_layout = QHBoxLayout()
+                end_label = QLabel("Kết thúc:", self.filter_groupbox)
+                self.date_time_end_layout.addWidget(end_label)
+                self.date_time_end_layout.addSpacing(2)
                 self.dateTimeEdit_end = QDateTimeEdit(self.filter_groupbox)
                 self.dateTimeEdit_end.setObjectName(u"dateTimeEdit_end")
                 self.dateTimeEdit_end.setFixedSize(200, 50)
@@ -63,7 +66,8 @@ class PAGEWIDGET(QWidget):
                 end_date = QDateTime.currentDateTime()
                 end_date.setTime(QTime(23, 59, 59))
                 self.dateTimeEdit_end.setDateTime(end_date)
-                self.date_time_layout.addWidget(self.dateTimeEdit_end)
+                self.date_time_end_layout.addWidget(self.dateTimeEdit_end)
+                self.date_time_layout.addLayout(self.date_time_end_layout)
 
                 self.filter_layout.addLayout(self.date_time_layout)
                 self.filter_layout.addSpacing(50)
@@ -299,8 +303,7 @@ class PAGEWIDGET(QWidget):
                                 time = (item_time.text())
                                 path_video = self.tableWidget.item(index.row(), 2).text()
                                 page_report = PAGEREPORT(video_id, time, self.analyzer, path_video)
-                                page_report.show()
-          
+                                page_report.exec_()
         def resizeEvent(self,event):
                 screen_width = event.size().width()
                 column_widths = [int(ratio * screen_width) for ratio in column_ratios]
