@@ -36,7 +36,7 @@ class PAGEIMAGEVIEW(QDialog):
                 self.video_id = video_id
                 self.path_origin = path_origin
 
-                path_video_dir = f"{STATIC_FOLDER}/videos/{time.strftime('%Y%m%d')}/{self.path_origin}"
+                path_video_dir = f"{STATIC_FOLDER}/videos/{time.strftime('%Y%m%d')}/{os.path.basename(self.path_origin)}"
                 if not os.path.exists(path_video_dir):
                         os.makedirs(path_video_dir)
                 path_video = f"{path_video_dir}/{self.video_id}.wmv"

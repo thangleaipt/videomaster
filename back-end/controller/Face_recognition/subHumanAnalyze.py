@@ -277,6 +277,14 @@ class SubVideoAnalyze(QRunnable):
                 main_color_clothes = None
                 name_color = None
 
+                annotator_save = Annotator(
+                    image_save,
+                    None,
+                    None,
+                    font="Arial.ttf",
+                    pil=False,
+                )
+
 
                 if instance is not None and len(instance) > 0:
                     box_face = instance[0]
@@ -288,8 +296,7 @@ class SubVideoAnalyze(QRunnable):
                     score_face = instance[0][4]
 
                     box_face = [int(box_face[0]), int(box_face[1]), int(box_face[2]), int(box_face[3])]
-                    cv2.rectangle(image_save, (box_face[0], box_face[1]), (box_face[2], box_face[3]), (0, 0, 255), 2)
-                    cv2.putText(image_save, label, (box_face[0], box_face[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                    # cv2.rectangle(image_save, (box_face[0], box_face[1]), (box_face[2], box_face[3]), (0, 0, 255), 2)
                     face_image = image[max(box_face[1],0):min(box_face[3], frame.shape[0]), max(box_face[0],0):min(box_face[2], frame.shape[1])]
                     box_face_plot = [box_face[0], box_face[1], box_face[2], box_face[3]]
                     
@@ -319,6 +326,7 @@ class SubVideoAnalyze(QRunnable):
                             color_face = (255, 0, 0)
 
                     annotator.box_label(box_face_plot,"",color_face)
+                    annotator_save.box_label(box_face_plot, label, color_face)
                 
                 if d is not None and len(d) > 0:
                     box_person = d[0][0:4]
@@ -331,9 +339,10 @@ class SubVideoAnalyze(QRunnable):
                         color_person = main_color_clothes
                         color_text = (255, 255, 255)
 
-                    cv2.rectangle(image_save, (box_person[0], box_person[1]), (box_person[2], box_person[3]), (color_person[0], color_person[1], color_person[2]), 2)
+                    # cv2.rectangle(image_save, (box_person[0], box_person[1]), (box_person[2], box_person[3]), (color_person[0], color_person[1], color_person[2]), 2)
                     person_image = image[box_person[1]:box_person[3], box_person[0]:box_person[2]]
                     annotator.box_label(box_person, label, color=color_person,txt_color=color_text)
+                    annotator_save.box_label(box_person, label, color=color_person,txt_color=color_text)
 
                 frame = annotator.result()
 
