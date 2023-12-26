@@ -3,7 +3,7 @@ import os
 import subprocess
 import time
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt, QDateTime, QTime)
+    QRect, QSize, QUrl, Qt, QDateTime, QTime, QTimeZone)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter,QPixmap,QImage,
     QRadialGradient)
@@ -25,7 +25,7 @@ from PIL import Image
 
 
 column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
-date_time_format = "yyyy-MM-dd hh:mm"
+date_time_format = "yyyy-MM-dd hh:mm:ss"
 
 
 class PAGEIMAGEVIEW(QDialog):
@@ -598,7 +598,13 @@ class PAGEREPORT(QDialog):
                         
                         # time_start = QDateTime.fromString(self.time, date_time_format)
                         time_target = QDateTime.fromSecsSinceEpoch(report['time'], Qt.UTC)
+                        vietnam_time_zone = QTimeZone('Asia/Ho_Chi_Minh')
+                        time_target = time_target.toTimeZone(vietnam_time_zone)
+
+                        # Lấy chuỗi biểu diễn của thời gian theo múi giờ mới
+                        time_target_string = time_target.toString(Qt.DefaultLocaleLongDate)
                         time_string = time_target.toString(date_time_format)
+
                         self.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
 
                         list_path_face_image = []
