@@ -597,12 +597,7 @@ class PAGEREPORT(QDialog):
                                 self.tableWidget.setItem(i, 5, item)
                         
                         # time_start = QDateTime.fromString(self.time, date_time_format)
-                        time_target = QDateTime.fromSecsSinceEpoch(report['time'], Qt.UTC)
-                        vietnam_time_zone = QTimeZone('Asia/Ho_Chi_Minh')
-                        time_target = time_target.toTimeZone(vietnam_time_zone)
-
-                        # Lấy chuỗi biểu diễn của thời gian theo múi giờ mới
-                        time_target_string = time_target.toString(Qt.DefaultLocaleLongDate)
+                        time_target = QDateTime.fromSecsSinceEpoch(report['time'])
                         time_string = time_target.toString(date_time_format)
 
                         self.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))

@@ -297,7 +297,6 @@ class SubVideoAnalyze(QRunnable):
                     score_face = instance[0][4]
 
                     box_face = [int(box_face[0]), int(box_face[1]), int(box_face[2]), int(box_face[3])]
-                    # cv2.rectangle(image_save, (box_face[0], box_face[1]), (box_face[2], box_face[3]), (0, 0, 255), 2)
                     face_image = image[max(box_face[1],0):min(box_face[3], frame.shape[0]), max(box_face[0],0):min(box_face[2], frame.shape[1])]
                     box_face_plot = [box_face[0], box_face[1], box_face[2], box_face[3]]
                     
@@ -340,7 +339,6 @@ class SubVideoAnalyze(QRunnable):
                         color_person = main_color_clothes
                         color_text = (255, 255, 255)
 
-                    # cv2.rectangle(image_save, (box_person[0], box_person[1]), (box_person[2], box_person[3]), (color_person[0], color_person[1], color_person[2]), 2)
                     person_image = image[box_person[1]:box_person[3], box_person[0]:box_person[2]]
                     annotator.box_label(box_person, label, color=color_person,txt_color=color_text)
                     annotator_save.box_label(box_person, "", color=color_person,txt_color=color_text)
@@ -348,13 +346,13 @@ class SubVideoAnalyze(QRunnable):
                 frame = annotator.result()
 
                 if label_name is not None and face_image is not None:
-                    path_dir_image = f"{STATIC_FOLDER}/results/Camera_{self.name_video}/{datetime.now().strftime(DATE_TIME_FORMAT)}/id_{label_name.replace(' ', '')}"
+                    path_dir_image = f"{STATIC_FOLDER}/results/{datetime.now().strftime(DATE_TIME_FORMAT)}/Camera_{self.name_video}_{os.path.basename(self.video_path_report)}/id_{label_name.replace(' ', '')}"
                     path_save_face_image = f"{path_dir_image}/face_{time.time()}.jpg"
                     if person_image is not None:
                         path_save_person_image = f"{path_dir_image}/person_{time.time()}.jpg"
                 elif label_name is None:
                     if face_image is not None or person_image is not None:
-                        path_dir_image = f"{STATIC_FOLDER}/results/Camera_{self.name_video}/{datetime.now().strftime(DATE_TIME_FORMAT)}/id_{guid}"
+                        path_dir_image = f"{STATIC_FOLDER}/results/{datetime.now().strftime(DATE_TIME_FORMAT)}/Camera_{self.name_video}_{os.path.basename(self.video_path_report)}/id_{guid}"
                     if face_image is not None:
                         path_save_face_image = f"{path_dir_image}/face_{time.time()}.jpg"
                     if person_image is not None:

@@ -14,6 +14,8 @@
 ##
 ################################################################################
 
+import time
+from datetime import datetime
 import sys
 import platform
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -90,9 +92,15 @@ class LoginWindow(QMainWindow):
         
         # if verify is True:
             # Hide login
+        target_date = datetime(2024, 12, 1, 0, 0, 0)
+        target_timestamp = target_date.timestamp()
+        current_timestamp = time.time()
+        if current_timestamp < target_timestamp:
             self.close()
             window = MainWindow()
             window.show()
+        else: 
+            QMessageBox.warning(self, "Hết hạn đăng nhập")
         # else:
         #     QMessageBox.warning(self, "Lỗi đăng nhập", f"{message}", QMessageBox.Ok)
             

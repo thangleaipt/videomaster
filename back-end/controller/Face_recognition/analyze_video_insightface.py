@@ -59,6 +59,8 @@ class FaceAnalysisInsightFace:
     def load_db_from_folder(self):
         try:
             db_path = self.db_path
+            if not os.path.exists(db_path):
+                os.makedirs(db_path)
 
             print(f"Loading representations from {db_path}")
 
