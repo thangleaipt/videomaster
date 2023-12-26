@@ -213,7 +213,7 @@ class SubVideoAnalyze(QRunnable):
         max_count = max(element_count.values())
         most_frequent_elements = [key for key, value in element_count.items() if value == max_count]
         
-        return most_frequent_elements
+        return most_frequent_elements[0]
 
     def average_number(self,age_list):
         if not age_list or age_list is None:  # Check if the list is empty to avoid division by zero
@@ -540,9 +540,9 @@ class SubVideoAnalyze(QRunnable):
                 if len(person_model.list_image_path) == []:
                     continue
                 if person_model.average_gender is not None:
-                    if person_model.average_gender[0] == "male" or person_model.average_gender == "male":
+                    if person_model.average_gender == "male":
                         gender = 1
-                    elif person_model.average_gender[0] == "female" or person_model.average_gender == "female":
+                    elif person_model.average_gender == "female":
                         gender = 0
                 else:
                     gender = 2
@@ -556,7 +556,7 @@ class SubVideoAnalyze(QRunnable):
                 # time_model = person_model_time.timestamp()
                 time_model = person_model.time
                 # time_model = datetime.timestamp(person_model.time)
-                if person_model.average_check_mask == "Mask":
+                if person_model.average_check_mask == 1:
                     mask = 1
                 else:
                     mask = 0
