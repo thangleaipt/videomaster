@@ -103,8 +103,8 @@ class SubVideoAnalyze(QRunnable):
 
                     self.list_image_label = list_image_label
                     percent = round((self.index_frame / self.frame_count), 2)*100
-                    
-                    # self.output_video.write(img0)
+                    if len(list_image_label) > 0:
+                        self.output_video.write(image)
                     self.signals.result.emit(percent)
                     # self.signals.updateUI.emit(self.list_image_label)
 
@@ -143,7 +143,8 @@ class SubVideoAnalyze(QRunnable):
             for j in range(num_faces):
                 iou_matrix[i, j] = self.calculate_iou(person_boxes[i][0][:4], face_boxes[j][0])
         row_ind, col_ind = linear_sum_assignment(-iou_matrix)
-        matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind)]
+        # matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind)]
+        matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind) if iou_matrix[row, col] > 0]
         return matched_pairs
 
     def get_matched_pairs(self,person_boxes, face_boxes):
@@ -220,7 +221,13 @@ class SubVideoAnalyze(QRunnable):
         average = total_age / len(age_list)
         
         return average
-  
+    
+    def add_seconds_to_datetime(self,current_qdatetime, seconds):
+        # Get the current QDateTime from dateTimeEdit_start
+        # Add seconds to the current QDateTime
+        new_qdatetime = current_qdatetime.addSecs(seconds)
+
+        return new_qdatetime
 
     def analyze_video(self, image):
         try:
@@ -282,6 +289,7 @@ class SubVideoAnalyze(QRunnable):
 
                     box_face = [int(box_face[0]), int(box_face[1]), int(box_face[2]), int(box_face[3])]
                     cv2.rectangle(image_save, (box_face[0], box_face[1]), (box_face[2], box_face[3]), (0, 0, 255), 2)
+                    cv2.putText(image_save, label, (box_face[0], box_face[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     face_image = image[max(box_face[1],0):min(box_face[3], frame.shape[0]), max(box_face[0],0):min(box_face[2], frame.shape[1])]
                     box_face_plot = [box_face[0], box_face[1], box_face[2], box_face[3]]
                     
@@ -420,9 +428,11 @@ class SubVideoAnalyze(QRunnable):
                     cv2.imwrite(path_image, image_save)
                     person_model.list_image_path.append(path_image)
 
-                    current_time_seconds = self.index_frame + self.time_start*5
+                    current_time_seconds = self.add_seconds_to_datetime(self.time_start, int(self.index_frame/self.fps))
+                    print(f"Second: {current_time_seconds} {int(self.index_frame/self.fps)}")
                 
-                    person_model.time = int(current_time_seconds)
+                    person_model.time = int(current_time_seconds.toSecsSinceEpoch())
+                    print(f"Person time: {person_model.time}")
                     person_model.real_time = int(time.time())
                     self.list_person_model.append(person_model)
                     self.list_total_id.append(guid)
@@ -504,7 +514,7 @@ class SubVideoAnalyze(QRunnable):
 
                         cv2.imwrite(path_image, image_save)
                         self.list_person_model[index].list_image_path.append(path_image)  
-            return frame,list_image_label
+            return frame,list_recognition_insightface_merge
         except Exception as e:
             print(f'[{datetime.now().strftime(DATETIME_FORMAT)}][analyze][generate_frames]: {e}')
             logging.exception(f'[analyze][generate_frames]: {e}')

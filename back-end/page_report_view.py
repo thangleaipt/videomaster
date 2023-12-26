@@ -25,17 +25,18 @@ from PIL import Image
 
 
 column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
-date_time_format = "yyyy-MM-dd hh:mm:ss"
+date_time_format = "yyyy-MM-dd hh:mm"
 
 
 class PAGEIMAGEVIEW(QDialog):
-        def __init__(self, list_image_path=None, video_id=None, parent=None):
-                super().__init__(parent)
+        def __init__(self, list_image_path=None, video_id=None,path_origin= None):
+                super().__init__()
 
                 self.list_path_images = list_image_path
                 self.video_id = video_id
+                self.path_origin = path_origin
 
-                path_video_dir = f"{STATIC_FOLDER}/videos/{time.strftime('%Y%m%d')}"
+                path_video_dir = f"{STATIC_FOLDER}/videos/{time.strftime('%Y%m%d')}/{self.path_origin}"
                 if not os.path.exists(path_video_dir):
                         os.makedirs(path_video_dir)
                 path_video = f"{path_video_dir}/{self.video_id}.wmv"
@@ -70,7 +71,7 @@ class PAGEIMAGEVIEW(QDialog):
         def stop_video(self):
                 self.media_player.stop()
 
-        def create_video_from_images(self,image_paths, video_name='video_output.avi', output_size=(256, 256), frame_rate=10):
+        def create_video_from_images(self,image_paths, video_name='video_output.avi', output_size=(256, 256), frame_rate=5):
                 if len(image_paths) == 0:
                         QMessageBox.warning(self, "Không có hình ảnh", "Không có hình ảnh", QMessageBox.Ok)
                         return
@@ -79,11 +80,12 @@ class PAGEIMAGEVIEW(QDialog):
 
                 video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), frame_rate, (width, height))
 
-                for image_path in image_paths:
-                        img = cv2.imread(image_path)
-                        output_image = np.zeros((height, width, 3), dtype=np.uint8)
-                        output_image[0:img.shape[0], 0:img.shape[1], :] = img
-                        video.write(output_image)
+                for index,image_path in enumerate(image_paths):
+                        if index < 70:
+                                img = cv2.imread(image_path)
+                                output_image = np.zeros((height, width, 3), dtype=np.uint8)
+                                output_image[0:img.shape[0], 0:img.shape[1], :] = img
+                                video.write(output_image)
 
                 cv2.destroyAllWindows()
                 video.release()
@@ -482,6 +484,7 @@ class PAGEREPORT(QDialog):
 
 
         def get_list_report(self):
+                self.list_reports_filter = []
                 # Get the Unix timestamp from self.dateTimeEdit_start
                 start_timestamp = self.dateTimeEdit_start.dateTime().toSecsSinceEpoch()
                 # Get the Unix timestamp from self.dateTimeEdit_end
@@ -593,11 +596,14 @@ class PAGEREPORT(QDialog):
                                 item.setData(Qt.DecorationRole, pixmap_color)
                                 self.tableWidget.setItem(i, 5, item)
                         
-                        time_start = QDateTime.fromString(self.time, date_time_format)
-                        time_target = time_start.addSecs(int(int(report['time'])/5))
+                        # time_start = QDateTime.fromString(self.time, date_time_format)
+                        time_target = QDateTime.fromSecsSinceEpoch(report['time'], Qt.UTC)
                         time_string = time_target.toString(date_time_format)
                         self.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
                         image_path = report['images'][0]['path']
+                        if len(report['images']) > 2:
+                                image_path = report['images'][len(report['images'])//2]['path']
+
                         pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
                         item = QTableWidgetItem()
                         item.setData(Qt.DecorationRole, pixmap)
@@ -620,7 +626,7 @@ class PAGEREPORT(QDialog):
                                 if "origin_" in name_image:
                                         list_image_path.append(path_image)
 
-                        page_image = PAGEIMAGEVIEW(list_image_path,video_id)
+                        page_image = PAGEIMAGEVIEW(list_image_path,item,self.path_video)
                         page_image.exec_()
 
         def _cosine_distance( self,a, b):
@@ -714,9 +720,11 @@ class PAGEREPORT(QDialog):
                                         else:
                                                 color = report['code_color']
 
-                                        time_start = QDateTime.fromString(self.time, date_time_format)
-                                        time_target = time_start.addSecs(int(int(report['time'])/5))
+                                        # time_start = QDateTime.fromString(self.time, date_time_format)
+                                        time_target = QDateTime.fromSecsSinceEpoch(report['time'], Qt.UTC)
                                         time_string = time_target.toString(date_time_format)
+                                        # time_target = time_start.addSecs(int(int(report['time'])/5))
+                                        # time_string = time_target.toString(date_time_format)
 
                                         row_data = [
                                                 str(index_report),
@@ -759,7 +767,7 @@ class PAGEREPORT(QDialog):
                                                                         
                                                                         image_path = f"{path_color_dir}\\{i}_{data}.png"
                                                                         image.save(image_path)
-                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 4) * row_height-30, width=60, height=60)
+                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 4) * row_height-30, width=0, height=60)
                                                         else: 
                                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 4) * row_height, str(data))
                                                 else:

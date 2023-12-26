@@ -179,6 +179,15 @@ class PAGEHUMAN(QWidget):
                     list_video_split.append((output_path, start_time))
             video.release()
             return list_video_split
+    
+    def add_seconds_to_datetime(self, seconds):
+        # Get the current QDateTime from dateTimeEdit_start
+        current_qdatetime = self.dateTimeEdit_start.dateTime()
+
+        # Add seconds to the current QDateTime
+        new_qdatetime = current_qdatetime.addSecs(seconds)
+
+        return new_qdatetime
             
     def show_dialog_video(self):
         if len(self.list_camera_screen) > 0:
@@ -201,7 +210,7 @@ class PAGEHUMAN(QWidget):
                 for index, path in enumerate(list_video_split):
                     self.list_camera_screen[index].path = path[0]
                     self.list_camera_screen[index].path_origin = self.file_path[0]
-                    self.list_camera_screen[index].time = path[1]
+                    self.list_camera_screen[index].time = self.add_seconds_to_datetime(path[1])
                     self.list_camera_screen[index].start_camera()
                     self.list_camera.append(index)
                 

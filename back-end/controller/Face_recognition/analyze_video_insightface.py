@@ -348,7 +348,7 @@ class FaceAnalysisInsightFace:
     def analyze_detect_face(self, frame):
         try:
             list_instance = []
-            bboxes, kpss = self.detector.autodetect(frame, max_num=5)
+            bboxes, kpss = self.detector.autodetect(frame, max_num=20)
             if len(bboxes) > 0:
                 for i,box in enumerate(bboxes):
                     instance, frame = self.recognition_insightface_frame(frame, box, kpss[i])

@@ -81,19 +81,20 @@ class LoginWindow(QMainWindow):
         if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
             self.click_login()
     def click_login(self):
-        print("click button login")
-        user = self.ui.lineEdit_Login.text()
-        password = self.ui.lineEdit_Password.text()
-        response = verify_authorization(user, password)
-        verify = response['verify_status']
-        message = response['message']
-        if verify is True:
+        # print("click button login")
+        # user = self.ui.lineEdit_Login.text()
+        # password = self.ui.lineEdit_Password.text()
+        # response = verify_authorization(user, password)
+        # verify = response['verify_status']
+        # message = response['message']
+        
+        # if verify is True:
             # Hide login
             self.close()
             window = MainWindow()
             window.show()
-        else:
-            QMessageBox.warning(self, "Lỗi đăng nhập", f"{message}", QMessageBox.Ok)
+        # else:
+        #     QMessageBox.warning(self, "Lỗi đăng nhập", f"{message}", QMessageBox.Ok)
             
 
     def mousePressEvent(self, event):

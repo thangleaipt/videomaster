@@ -270,8 +270,8 @@ class SCRFD:
 
     def autodetect(self, img, max_num=0, metric='max'):
         try:
-            bboxes, kpss = self.detect(img, input_size=(640, 640), thresh=0.5)
-            bboxes2, kpss2 = self.detect(img, input_size=(128, 128), thresh=0.5)
+            bboxes, kpss = self.detect(img, input_size=(640, 640), thresh=0.6)
+            bboxes2, kpss2 = self.detect(img, input_size=(128, 128), thresh=0.6)
             bboxes_all = np.concatenate([bboxes, bboxes2], axis=0)
             kpss_all = np.concatenate([kpss, kpss2], axis=0)
             keep = self.nms(bboxes_all)

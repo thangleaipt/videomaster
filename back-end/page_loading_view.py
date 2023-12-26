@@ -118,7 +118,7 @@ class ImportThread(QThread):
         self.finished.emit()
         
     def filter_report_query(self):
-                number = 0
+                
                 for file_path in self.report.list_file_path:
                         print("Selected file:", file_path)
                         frame_import = cv2.imread(file_path)
@@ -128,6 +128,7 @@ class ImportThread(QThread):
                         list_instance = self.report.analyzer.analyze_detect_face(frame_import)
                         
                         if len(list_instance) > 0 and list_instance[0][1] is not None:
+                                number = 0
                                 string_update = "Tìm khuôn mặt"
                                 self.progress_signal.emit(string_update)
                                 for report in self.report.list_reports:
@@ -140,6 +141,7 @@ class ImportThread(QThread):
                                                 self.report.list_reports_filter.append(report)
                         # Unknown person and have face
                         elif len(list_instance) > 0 and list_instance[0][1] is None: 
+                                number = 0
                                 string_update = "Tìm khuôn mặt"
                                 self.progress_signal.emit(string_update)
                                 feature_image_import = self.report.analyzer.get_feature(frame_import)[0]
@@ -171,6 +173,7 @@ class ImportThread(QThread):
                                                 self.report.list_reports_filter.append(max_report)
                                                 print(f"Tìm khuôn mặt: {max_report['person_name']} - {self.counter}%")
                         if len(list_instance) == 0 or len(self.report.list_reports_filter) >= 0:
+                                number = 0
                                 string_update = "Tìm dáng người"
                                 self.progress_signal.emit(string_update)
                                 h_import,w1_import,_ = frame_import.shape
