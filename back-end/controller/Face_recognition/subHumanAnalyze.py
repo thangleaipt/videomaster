@@ -487,7 +487,11 @@ class SubVideoAnalyze(QRunnable):
                             self.list_person_model[index].average_gender = gender
 
                         self.list_person_model[index].average_age = self.average_number(self.list_person_model[index].list_age)
-                        self.list_person_model[index].average_check_mask = label_mask
+                        if len(self.list_person_model[index].list_gender) > 0:
+                            self.list_person_model[index].average_check_mask = self.count_most_frequent_element(self.list_person_model[index].list_check_masks)
+                        else:
+                            self.list_person_model[index].average_check_mask = label_mask
+
                         if len(self.list_person_model[index].list_age) > 0:
                             self.list_person_model[index].start_age = min(self.list_person_model[index].list_age)
                             self.list_person_model[index].end_age = max(self.list_person_model[index].list_age)
