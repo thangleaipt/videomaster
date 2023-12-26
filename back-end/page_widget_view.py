@@ -263,13 +263,9 @@ class PAGEWIDGET(QWidget):
 
         def convert_timestamp_to_datetime(self,timestamp):
                 dt_utc = datetime.utcfromtimestamp(timestamp)
-                
                 dt_utc = dt_utc.replace(tzinfo=timezone.utc)
-                
                 dt_vietnam = dt_utc.astimezone(timezone(timedelta(hours=7)))
-                
                 dt_vietnam_str = dt_vietnam.strftime('%Y-%m-%d %H:%M:%S')
-                
                 return dt_vietnam_str
         def get_list_path_video(self):
                 # Get the Unix timestamp from self.dateTimeEdit_start

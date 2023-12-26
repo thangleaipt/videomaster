@@ -84,7 +84,7 @@ class SubVideoAnalyze(QRunnable):
         self.frame_height = int(self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.frame_count = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
        
-        self.output_video = cv2.VideoWriter(f"{path_dir}\\output.mp4",cv2.VideoWriter_fourcc(*'mp4v'), 5, (self.frame_width, self.frame_height))
+        # self.output_video = cv2.VideoWriter(f"{path_dir}\\output.mp4",cv2.VideoWriter_fourcc(*'mp4v'), 5, (self.frame_width, self.frame_height))
 
     def run(self):
         while self.video_capture is not None:
@@ -104,8 +104,8 @@ class SubVideoAnalyze(QRunnable):
 
                     self.list_image_label = list_image_label
                     percent = round((self.index_frame / self.frame_count), 2)*100
-                    if len(list_image_label) > 0:
-                        self.output_video.write(image)
+                    # if len(list_image_label) > 0:
+                    #     self.output_video.write(image)
                     self.signals.result.emit(percent)
                     # self.signals.updateUI.emit(self.list_image_label)
 
@@ -131,7 +131,7 @@ class SubVideoAnalyze(QRunnable):
             self.is_running = False
             self.video_capture.release()
             self.video_capture = None
-        self.output_video.release()
+        # self.output_video.release()
             
         list_thread = threading.enumerate()
         print(f"Active thread names: {', '.join([thread.name for thread in list_thread])}")

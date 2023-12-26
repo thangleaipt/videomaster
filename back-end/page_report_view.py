@@ -685,12 +685,17 @@ class PAGEREPORT(QDialog):
                         total_items = len(self.list_reports_filter)
                         total_pages = (total_items + items_per_page - 1) // items_per_page
                         index_report = 0
+                        logo_path = "icons/img/photo_2023-12-06_16-22-01.jpg"
+
+                        pdf_canvas.drawInlineImage(logo_path, 250, 710, width=133, height=64)
                         pdf_canvas.setFont("Segoe UI Bold", 20)
-                        pdf_canvas.drawString(225, 700, "BÁO CÁO NHẬN DIỆN")
+                        pdf_canvas.drawString(180, 685, "PHẦN MỀM VIDEOMASTER AI")
+                        pdf_canvas.setFont("Segoe UI Bold", 20)
+                        pdf_canvas.drawString(215, 660, "BÁO CÁO NHẬN DIỆN")
                         pdf_canvas.setFont("Segoe UI Bold", 11)
-                        pdf_canvas.drawString(80, 660, f"Thời gian bắt đầu Video: {self.time}")
-                        pdf_canvas.drawString(80, 640, f"Thời gian tạo PDF: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                        pdf_canvas.drawString(80, 620, f"Tổng số bản ghi: {total_items}")
+                        pdf_canvas.drawString(80, 640, f"Thời gian bắt đầu Video: {self.time}")
+                        pdf_canvas.drawString(80, 620, f"Thời gian tạo PDF: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                        pdf_canvas.drawString(80, 600, f"Tổng số bản ghi: {total_items}")
                         for page_number in range(total_pages):
                                 pdf_canvas.setFont("Segoe UI", 9)
                                 # Tạo bảng
@@ -752,24 +757,50 @@ class PAGEREPORT(QDialog):
                                 # Vẽ bảng
                                 row_height = 80
                                 col_widths = [40, 40, 60, 60, 60, 60, 60, 65]
+                                cell_height = 60
+                                cell_widths = [40, 80,60,70,60,65,75,90]
 
                                 for j, header in enumerate(table_data[0]):
                                         pdf_canvas.setFont("Segoe UI Bold", 8, leading=10)
                                         if page_number == 0:
+                                                if j == 0:
+                                                        x = 30
+                                                else:
+                                                        x = x_before + cell_widths[j-1]
+                                                x_before = x
+                                                y = 780 - (0 + 3) * row_height-30
+                                                pdf_canvas.rect(x, y, cell_widths[j], cell_height)
+                                                # pdf_canvas.rect(j * col_widths[j] + 30, 780- (0 + 3) * row_height, col_widths[j]+25, cell_height)
                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780- (0 + 3) * row_height, header)
                                         else:
+                                                if j == 0:
+                                                        x = 30
+                                                else:
+                                                        x = x_before + cell_widths[j-1]
+                                                x_before = x
+                                                y = 780 - (0 + 1) * row_height-30
+                                                pdf_canvas.rect(x, y, cell_widths[j], cell_height)
                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780- (0 + 1) * row_height, header)
+                                                # pdf_canvas.rect(j * col_widths[j] + 30, 780- (0 + 1) * row_height, col_widths[j]+25, cell_height)
                                 path_color_dir = f"{STATIC_FOLDER}\\Documents\\color"
                                 if not os.path.exists(path_color_dir):
                                         os.makedirs(path_color_dir)
                                 pdf_canvas.setFont("Segoe UI", 8)
                                 for i, row in enumerate(table_data[1:]): 
                                         for j, data in enumerate(row):
+
                                                 pdf_canvas.setFont("Segoe UI", 8, leading=10)
                                                 if page_number == 0:
+                                                        if j == 0:
+                                                                x = 30
+                                                        else:
+                                                                x = x_before + cell_widths[j-1]
+                                                        x_before = x
+                                                        y = 780 - (i + 4) * row_height-30
+                                                        pdf_canvas.rect(x, y, cell_widths[j], cell_height)
                                                         if j == 5:
                                                                 if data is None:
-                                                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 4) * row_height, "Không xác định")
+                                                                        pdf_canvas.drawString(j * col_widths[j] + 45, 780 - (i + 4) * row_height, "Không xác định")
                                                                 else:
                                                                         data_color = data.split(",")
                                                                         converted_data = [int(element) for element in data_color]
@@ -778,13 +809,22 @@ class PAGEREPORT(QDialog):
                                                                         
                                                                         image_path = f"{path_color_dir}\\{i}_{data}.png"
                                                                         image.save(image_path)
-                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 4) * row_height-30, width=50, height=60)
+                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 45, 780 - (i + 4) * row_height-10, width=50, height=30)
                                                         else: 
                                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 4) * row_height, str(data))
+                                                                
+                                                        # Draw cell border
                                                 else:
+                                                        if j == 0:
+                                                                x = 30
+                                                        else:
+                                                                x = x_before + cell_widths[j-1]
+                                                        x_before = x
+                                                        y = 780 - (i + 2) * row_height-30
+                                                        pdf_canvas.rect(x, y, cell_widths[j], cell_height)
                                                         if j == 5:
                                                                 if data is None:
-                                                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, "Không xác định")
+                                                                        pdf_canvas.drawString(j * col_widths[j] + 45, 780 - (i + 2) * row_height, "Không xác định")
                                                                 else:
                                                                         data_color = data.split(",")
                                                                         converted_data = [int(element) for element in data_color]
@@ -792,11 +832,12 @@ class PAGEREPORT(QDialog):
                                                                         # Chuyển đổi ảnh thành dữ liệu bytes  
                                                                         image_path = f"{path_color_dir}\\{i}_{data}.png"
                                                                         image.save(image_path)
-                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 2) * row_height-30, width=50, height=60)
+                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 45, 780 - (i + 2) * row_height-10, width=50, height=30)
                                                         else:
                                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, str(data))
 
                                 for i, report in enumerate(self.list_reports_filter[start_index:end_index]):
+                                        
                                         if len(report.get('images', [])) > 0:
                                                 image_path = report['images'][0]['path']
                                                 list_path_face_image = []
@@ -813,13 +854,25 @@ class PAGEREPORT(QDialog):
                                                 else:
                                                         image_path = list_path_person_image[len(list_path_person_image)//2]
                                                 if page_number==0:
+                                                        x = x_before + 75
+                                                        y = 780 - (i + 4) * row_height-30
+                                                        pdf_canvas.rect(x, y, 90, 60)
                                                         pdf_canvas.drawInlineImage(image_path, 50 + 440, 780 - (i+4) * row_height-30, width=60, height=60)
                                                 else:
+                                                        x = x_before + 75
+                                                        y = 780 - (i + 2) * row_height-30
+                                                        pdf_canvas.rect(x, y, 90, 60)
                                                         pdf_canvas.drawInlineImage(image_path, 50 + 440, 780 - (i+2) * row_height-30, width=60, height=60)
                                         else:
                                                 if page_number==0:
+                                                        x = x_before + 75
+                                                        y = 780 - (i + 4) * row_height-30
+                                                        pdf_canvas.rect(x, y, 90, 60)
                                                         pdf_canvas.drawString(50 + 440, 780 - (i+4) * row_height-20, "Không có hình ảnh")
                                                 else:
+                                                        x = x_before + 75
+                                                        y = 780 - (i + 2) * row_height-30
+                                                        pdf_canvas.rect(x, y, 90, 60)
                                                         pdf_canvas.drawString(50 + 440, 780 - (i+2) * row_height-20, "Không có hình ảnh")
                                 
                                 pdf_canvas.showPage()
