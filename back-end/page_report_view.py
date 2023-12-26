@@ -778,7 +778,7 @@ class PAGEREPORT(QDialog):
                                                                         
                                                                         image_path = f"{path_color_dir}\\{i}_{data}.png"
                                                                         image.save(image_path)
-                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 4) * row_height-30, width=0, height=60)
+                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 4) * row_height-30, width=50, height=60)
                                                         else: 
                                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 4) * row_height, str(data))
                                                 else:
@@ -792,7 +792,7 @@ class PAGEREPORT(QDialog):
                                                                         # Chuyển đổi ảnh thành dữ liệu bytes  
                                                                         image_path = f"{path_color_dir}\\{i}_{data}.png"
                                                                         image.save(image_path)
-                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 2) * row_height-30, width=60, height=60)
+                                                                        pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 50, 780 - (i + 2) * row_height-30, width=50, height=60)
                                                         else:
                                                                 pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, str(data))
 

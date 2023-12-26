@@ -103,7 +103,7 @@ class SubVideoAnalyze(QRunnable):
                     print(f"Time recognition [{self.video_path}]: {time_end_recognition - time_start_recognition}")
 
                     self.list_image_label = list_image_label
-                    percent = round((self.index_frame / self.frame_count), 1)*100
+                    percent = round((self.index_frame / self.frame_count), 2)*100
                     if len(list_image_label) > 0:
                         self.output_video.write(image)
                     self.signals.result.emit(percent)
