@@ -491,10 +491,10 @@ class SubVideoAnalyze(QRunnable):
                             self.list_person_model[index].start_age = min(self.list_person_model[index].list_age)
                             self.list_person_model[index].end_age = max(self.list_person_model[index].list_age)
                         
-                        if extend_face_image is not None and path_save_face_image != "":
+                        if face_image is not None and path_save_face_image != "":
                             if extend_face_image.shape[0] > 0 and extend_face_image.shape[1] > 0:
                                 # extend_face_image = cv2.resize(extend_face_image, (128, 128))
-                                cv2.imwrite(path_save_face_image, extend_face_image)
+                                cv2.imwrite(path_save_face_image, face_image)
                                 self.list_person_model[index].face_image = path_save_face_image
                                 if path_save_face_image not in self.list_person_model[index].list_image_path:
                                     self.list_person_model[index].list_image_path.append(path_save_face_image)

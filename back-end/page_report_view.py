@@ -614,7 +614,7 @@ class PAGEREPORT(QDialog):
                                 image_path = list_path_face_image[len(list_path_face_image)//2]
                         else:
                                 image_path = list_path_person_image[len(list_path_person_image)//2]
-
+                        print(f"Length face: {len(list_path_face_image)} Length person: {len(list_path_person_image)} path: {image_path}")
                         pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
                         item = QTableWidgetItem()
                         item.setData(Qt.DecorationRole, pixmap)
