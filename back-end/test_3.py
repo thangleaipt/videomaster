@@ -1,11 +1,6 @@
-import time
-from datetime import datetime
+import os
 
-# Lấy giá trị thời gian hiện tại
-timestamp = time.time()
+# Lấy đường dẫn thư mục "Documents"
+documents_path = os.path.join(os.path.expanduser("~"), "Documents")
 
-# Chuyển đổi thành đối tượng datetime
-datetime_obj = datetime.fromtimestamp(timestamp)
-
-print("Giá trị thời gian:", timestamp)
-print("Đối tượng datetime:", datetime_obj)
+print(documents_path)

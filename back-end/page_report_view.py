@@ -638,7 +638,7 @@ class PAGEREPORT(QDialog):
                                 if "origin_" in name_image:
                                         list_image_path.append(path_image)
 
-                        page_image = PAGEIMAGEVIEW(list_image_path,item,self.path_video)
+                        page_image = PAGEIMAGEVIEW(list_image_path,video_id,self.path_video)
                         page_image.exec_()
 
         def _cosine_distance( self,a, b):
@@ -738,10 +738,9 @@ class PAGEREPORT(QDialog):
                                                 color = report['code_color']
 
                                         # time_start = QDateTime.fromString(self.time, date_time_format)
-                                        time_target = QDateTime.fromSecsSinceEpoch(report['time'], Qt.UTC)
-                                        time_string = time_target.toString(date_time_format)
-                                        # time_target = time_start.addSecs(int(int(report['time'])/5))
-                                        # time_string = time_target.toString(date_time_format)
+                                        time_target = QDateTime.fromSecsSinceEpoch(report['time'])
+                                        date_time_format_m = "yyyy-MM-dd hh:mm"
+                                        time_string = time_target.toString(date_time_format_m)
 
                                         row_data = [
                                                 str(index_report),
@@ -835,7 +834,10 @@ class PAGEREPORT(QDialog):
                                                                         image.save(image_path)
                                                                         pdf_canvas.drawInlineImage(image_path, j * col_widths[j] + 45, 780 - (i + 2) * row_height-10, width=50, height=30)
                                                         else:
-                                                                pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, str(data))
+                                                                if data == "Không xác định":
+                                                                        pdf_canvas.drawString(j * col_widths[j] + 45, 780 - (i + 2) * row_height, str(data))
+                                                                else:
+                                                                        pdf_canvas.drawString(j * col_widths[j] + 50, 780 - (i + 2) * row_height, str(data))
 
                                 for i, report in enumerate(self.list_reports_filter[start_index:end_index]):
                                         

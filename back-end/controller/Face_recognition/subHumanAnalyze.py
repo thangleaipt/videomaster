@@ -51,17 +51,17 @@ class SubVideoAnalyze(QRunnable):
             self.video_path_report = path_origin
 
         self.signals = CameraWorkerSignals()
-        if type(self.video_path) == str:
+        # if type(self.video_path) == str:
             
-            self.name_video = os.path.basename(str(self.video_path))
-            path_dir = f"{STATIC_FOLDER}\\{os.path.basename(str(self.video_path))}"
-            if not os.path.exists(path_dir):
-                os.makedirs(path_dir)
-        else:
-            self.name_video = self.video_path
-            path_dir = f"{STATIC_FOLDER}\\{str(self.name_video)}"
-            if not os.path.exists(path_dir):
-                os.makedirs(path_dir)
+        #     self.name_video = os.path.basename(str(self.video_path))
+        #     path_dir = f"{STATIC_FOLDER}\\{os.path.basename(str(self.video_path))}"
+        #     if not os.path.exists(path_dir):
+        #         os.makedirs(path_dir)
+        # else:
+        #     self.name_video = self.video_path
+        #     path_dir = f"{STATIC_FOLDER}\\{str(self.name_video)}"
+        #     if not os.path.exists(path_dir):
+        #         os.makedirs(path_dir)
 
         self.is_running = True
         self.index_frame = 0

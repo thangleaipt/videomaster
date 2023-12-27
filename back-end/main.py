@@ -25,7 +25,7 @@ from PySide2.QtWidgets import *
 from ui_Formlogin import Login
 # GUI FILE
 from app_modules import *
-from check_user import verify_authorization
+from check_user import verify_authorization, verify_login
 from server import create_db
 
 
@@ -83,27 +83,26 @@ class LoginWindow(QMainWindow):
         if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
             self.click_login()
     def click_login(self):
-        # print("click button login")
-        # user = self.ui.lineEdit_Login.text()
-        # password = self.ui.lineEdit_Password.text()
-        # response = verify_authorization(user, password)
-        # verify = response['verify_status']
-        # message = response['message']
-        
-        # if verify is True:
-            # Hide login
-        target_date = datetime(2024, 12, 1, 0, 0, 0)
+        print("click button login")
+        user = self.ui.lineEdit_Login.text()
+        password = self.ui.lineEdit_Password.text()
+        response = verify_login(user, password)
+        verify = response['verify_status']
+        message = response['message']
+        target_date = datetime(2024, 1, 13, 0, 0, 0)
         target_timestamp = target_date.timestamp()
         current_timestamp = time.time()
         if current_timestamp < target_timestamp:
-            self.close()
-            window = MainWindow()
-            window.show()
+            if verify is True:
+            # Hide login
+                self.close()
+                window = MainWindow()
+                window.show()
+            else:
+                QMessageBox.warning(self, "Lỗi đăng nhập", f"{message}", QMessageBox.Ok)
         else: 
             QMessageBox.warning(self, "Hết hạn đăng nhập")
-        # else:
-        #     QMessageBox.warning(self, "Lỗi đăng nhập", f"{message}", QMessageBox.Ok)
-            
+        
 
     def mousePressEvent(self, event):
         self.drag_pos = event.globalPos()

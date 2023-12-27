@@ -71,3 +71,41 @@ def verify_authorization(username, password):
   
   finally:
     session.close()
+
+def verify_login(username, password):
+  session = db_session()
+
+  try:
+    message = ""
+    verify_status = False
+    
+    # user = session.query(User).filter(or_(
+    #   User.email == username, 
+    #   User.phone == username
+    # )).first()
+
+
+
+    # if user is not None and bcrypt.verify(password, user.password):
+    if username == "admin" and password == "admin":
+      verify_status = True
+      message = "Đăng nhập thành công"
+
+    else:
+      message = "Sai thông tin đăng nhập !"
+  
+    return {
+      "message": message,
+      "response_status_code": 200,
+      "verify_status": verify_status
+    }
+  
+  except Exception as e:
+    return {
+      "message": f"{e}",
+      "response_status_code": 500,
+      "verify_status": False
+    }
+  
+  finally:
+    session.close()
