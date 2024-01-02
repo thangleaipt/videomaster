@@ -617,14 +617,22 @@ class PAGEREPORT(QDialog):
                                 image_path = list_path_person_image[len(list_path_person_image)//2]
                         print(f"Length face: {len(list_path_face_image)} Length person: {len(list_path_person_image)} path: {image_path}")
                         absolute_image_path = QFileInfo(image_path).absoluteFilePath()
-                        os.chmod(image_path, 0o755)
+                        
                         image = cv2.imread(absolute_image_path)
                         if image.shape[0] > image.shape[1]:
-                                image = cv2.resize(image, (128, int(128 * image.shape[1] / image.shape[0])))
+                                image = cv2.resize(image, (int(128 * image.shape[1] / image.shape[0]),128))
                         else:
-                                image = cv2.resize(image, (int(128 * image.shape[0] / image.shape[1]), 128))
-                        q_image = QImage(image.data, image.shape[1], image.shape[0], QImage.Format_BGR888)
+                                image = cv2.resize(image, (128, int(128 * image.shape[0] / image.shape[1])))
+
+                        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                        # Convert image to QImage
+                        height, width, channel = image.shape
+                        bytes_per_line = 3 * width
+                        q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+
+                        # Set the image to the QLabel
                         pixmap = QPixmap.fromImage(q_image)
+
                         item = QTableWidgetItem()
                         item.setData(Qt.DecorationRole, pixmap)
                         self.tableWidget.setItem(i, 7, item)

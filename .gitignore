@@ -1,4 +1,4 @@
 **/__pycache__/
-back-end/static
-back-end/dataset
-back-end/weights
+static
+dataset
+weights
