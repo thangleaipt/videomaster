@@ -619,9 +619,12 @@ class PAGEREPORT(QDialog):
                         absolute_image_path = QFileInfo(image_path).absoluteFilePath()
                         os.chmod(image_path, 0o755)
                         image = cv2.imread(absolute_image_path)
+                        if image.shape[0] > image.shape[1]:
+                                image = cv2.resize(image, (128, int(128 * image.shape[1] / image.shape[0])))
+                        else:
+                                image = cv2.resize(image, (int(128 * image.shape[0] / image.shape[1]), 128))
                         q_image = QImage(image.data, image.shape[1], image.shape[0], QImage.Format_BGR888)
                         pixmap = QPixmap.fromImage(q_image)
-                        pixmap = pixmap.scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
                         item = QTableWidgetItem()
                         item.setData(Qt.DecorationRole, pixmap)
                         self.tableWidget.setItem(i, 7, item)
