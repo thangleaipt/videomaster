@@ -183,10 +183,8 @@ class PAGEHUMAN(QWidget):
     def add_seconds_to_datetime(self, seconds):
         # Get the current QDateTime from dateTimeEdit_start
         current_qdatetime = self.dateTimeEdit_start.dateTime()
-
         # Add seconds to the current QDateTime
         new_qdatetime = current_qdatetime.addSecs(seconds)
-
         return new_qdatetime
             
     def show_dialog_video(self):
@@ -194,7 +192,6 @@ class PAGEHUMAN(QWidget):
             for path_camera in reversed(self.list_camera):
                  self.list_camera_screen[path_camera].stop_camera()
         self.list_camera = [] 
-
         file_dialog = QFileDialog()
         file_dialog.setNameFilter("Video files (*.mp4 *.avi *.mov)")
         file_dialog.setFileMode(QFileDialog.ExistingFile)

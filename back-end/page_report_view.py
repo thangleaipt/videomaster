@@ -3,7 +3,7 @@ import os
 import subprocess
 import time
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt, QDateTime, QTime, QTimeZone)
+    QRect, QSize, QUrl, Qt, QDateTime, QTime, QTimeZone, QFileInfo)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter,QPixmap,QImage,
     QRadialGradient)
@@ -616,7 +616,12 @@ class PAGEREPORT(QDialog):
                         else:
                                 image_path = list_path_person_image[len(list_path_person_image)//2]
                         print(f"Length face: {len(list_path_face_image)} Length person: {len(list_path_person_image)} path: {image_path}")
-                        pixmap = QPixmap(image_path).scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
+                        absolute_image_path = QFileInfo(image_path).absoluteFilePath()
+                        os.chmod(image_path, 0o755)
+                        image = cv2.imread(absolute_image_path)
+                        q_image = QImage(image.data, image.shape[1], image.shape[0], QImage.Format_BGR888)
+                        pixmap = QPixmap.fromImage(q_image)
+                        pixmap = pixmap.scaledToWidth(128, Qt.SmoothTransformation).scaledToHeight(128, Qt.SmoothTransformation)
                         item = QTableWidgetItem()
                         item.setData(Qt.DecorationRole, pixmap)
                         self.tableWidget.setItem(i, 7, item)
