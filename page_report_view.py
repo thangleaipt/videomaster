@@ -94,6 +94,7 @@ class PAGEREPORT(QDialog):
         def __init__(self, index, time, analyzer, path_video):
                 super().__init__()
                 self.list_reports_filter = []
+                self.list_reports = []
                 self.list_file_path = []
                 self.counter = 0
                 self.video_id = index
