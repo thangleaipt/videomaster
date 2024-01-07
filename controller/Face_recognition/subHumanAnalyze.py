@@ -142,10 +142,10 @@ class SubVideoAnalyze(QRunnable):
         iou_matrix = np.zeros((num_persons, num_faces))
         for i in range(num_persons):
             for j in range(num_faces):
-                iou_matrix[i, j] = self.calculate_iou(person_boxes[i][0][:4], face_boxes[j][0])
+                iou_matrix[i, j] = self.calculate_iou(face_boxes[j][0], person_boxes[i][0][:4])
         row_ind, col_ind = linear_sum_assignment(-iou_matrix)
         # matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind)]
-        matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind) if iou_matrix[row, col] > 0]
+        matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind) if iou_matrix[row, col] > 0.1]
         return matched_pairs
 
     def get_matched_pairs(self,person_boxes, face_boxes):

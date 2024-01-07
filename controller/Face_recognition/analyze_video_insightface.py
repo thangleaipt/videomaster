@@ -208,7 +208,7 @@ class FaceAnalysisInsightFace:
                 sim = self.rec.compute_sim(target_representation, source_representation)
                 distances.append(sim)
             
-            threshold = 0.43
+            threshold = 0.4
 
             result_df[f"distance_{os.path.basename(self.model_path)}"] = distances
             result_df = result_df.drop(columns=[f"{os.path.basename(self.model_path)}_representation"])

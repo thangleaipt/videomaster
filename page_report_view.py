@@ -24,7 +24,7 @@ from page_loading_view import LoadingScreen
 from PIL import Image
 
 
-column_ratios = [0.1, 0.15, 0.1, 0.1,0.1,0.15,0.15,0.15]
+column_ratios = [0.1, 0.1, 0.1, 0.1,0.1,0.1,0.1,0.1, 0.1, 0.1]
 date_time_format = "yyyy-MM-dd hh:mm:ss"
 
 
@@ -236,11 +236,11 @@ class PAGEREPORT(QDialog):
                 self.search_button.clicked.connect(self.filter_report)
 
                  # Buton Search
-                self.import_button = QPushButton("Lọc ảnh", self.filter_groupbox)
-                self.import_button.setObjectName(u"import_button")
-                self.import_button.setFixedHeight(50)
-                self.filter_layout.addWidget(self.import_button)
-                self.import_button.setStyleSheet(u"QPushButton {\n"
+                self.face_filter_button = QPushButton("Lọc ảnh khuôn mặt", self.filter_groupbox)
+                self.face_filter_button.setObjectName(u"import_button")
+                self.face_filter_button.setFixedHeight(50)
+                self.filter_layout.addWidget(self.face_filter_button)
+                self.face_filter_button.setStyleSheet(u"QPushButton {\n"
                 "	border: 2px solid rgb(27, 29, 35);\n"
                 "	border-radius: 5px;	\n"
                 # "	background-color: rgb(27, 29, 35);\n"
@@ -255,8 +255,31 @@ class PAGEREPORT(QDialog):
                 "}")
                 icon3 = QIcon()
                 icon3.addFile(u":/16x16/icons/16x16/cil-magnifying-glass.png", QSize(), QIcon.Normal, QIcon.Off)
-                self.import_button.setIcon(icon3)
-                self.import_button.clicked.connect(self.import_image_query)
+                self.face_filter_button.setIcon(icon3)
+                self.face_filter_button.clicked.connect(self.import_image_query_face)
+
+                self.person_filter_button = QPushButton("Lọc ảnh dáng người", self.filter_groupbox)
+                self.person_filter_button.setObjectName(u"import_button")
+                self.person_filter_button.setFixedHeight(50)
+                self.filter_layout.addWidget(self.person_filter_button)
+                self.person_filter_button.setStyleSheet(u"QPushButton {\n"
+                "	border: 2px solid rgb(27, 29, 35);\n"
+                "	border-radius: 5px;	\n"
+                # "	background-color: rgb(27, 29, 35);\n"
+                "}\n"
+                "QPushButton:hover {\n"
+                "	background-color: rgb(57, 65, 80);\n"
+                "	border: 2px solid rgb(61, 70, 86);\n"
+                "}\n"
+                "QPushButton:pressed {	\n"
+                "	background-color: rgb(35, 40, 49);\n"
+                "	border: 2px solid rgb(43, 50, 61);\n"
+                "}")
+                icon3 = QIcon()
+                icon3.addFile(u":/16x16/icons/16x16/cil-magnifying-glass.png", QSize(), QIcon.Normal, QIcon.Off)
+                self.person_filter_button.setIcon(icon3)
+                self.person_filter_button.clicked.connect(self.import_image_query_person)
+
 
                 # Export report
                 self.export_button = QPushButton("Xuất File", self.filter_groupbox)
@@ -299,8 +322,8 @@ class PAGEREPORT(QDialog):
                 self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
                 self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
                 self.tableWidget = QTableWidget(self.frame_3)
-                if (self.tableWidget.columnCount() < 8):
-                        self.tableWidget.setColumnCount(8)
+                if (self.tableWidget.columnCount() < 10):
+                        self.tableWidget.setColumnCount(10)
                         __qtablewidgetitem = QTableWidgetItem()
                         self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
                         __qtablewidgetitem1 = QTableWidgetItem()
@@ -317,6 +340,10 @@ class PAGEREPORT(QDialog):
                         self.tableWidget.setHorizontalHeaderItem(6, __qtablewidgetitem6)
                         __qtablewidgetitem7 = QTableWidgetItem()
                         self.tableWidget.setHorizontalHeaderItem(7, __qtablewidgetitem7)
+                        __qtablewidgetitem8 = QTableWidgetItem()
+                        self.tableWidget.setHorizontalHeaderItem(8, __qtablewidgetitem8)
+                        __qtablewidgetitem9 = QTableWidgetItem()
+                        self.tableWidget.setHorizontalHeaderItem(9, __qtablewidgetitem9)
 
                 if (self.tableWidget.rowCount() < 16):
                         self.tableWidget.setRowCount(16)
@@ -473,15 +500,23 @@ class PAGEREPORT(QDialog):
                         ___qtablewidgetitem5 = self.tableWidget.horizontalHeaderItem(5)
                         ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"Màu Trang Phục", None));
                         ___qtablewidgetitem5.setTextColor(QColor(255, 255, 255))
-                        ___qtablewidgetitem5.setFont(font)        
+                        ___qtablewidgetitem5.setFont(font)    
                         ___qtablewidgetitem6 = self.tableWidget.horizontalHeaderItem(6)
-                        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"Thời gian nhận diện", None));
+                        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"Phần trăm khuôn mặt", None));
                         ___qtablewidgetitem6.setTextColor(QColor(255, 255, 255))
                         ___qtablewidgetitem6.setFont(font)
                         ___qtablewidgetitem7 = self.tableWidget.horizontalHeaderItem(7)
-                        ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"Ảnh", None));
+                        ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"Phần trăm dáng người", None));
                         ___qtablewidgetitem7.setTextColor(QColor(255, 255, 255))
-                        ___qtablewidgetitem7.setFont(font)
+                        ___qtablewidgetitem7.setFont(font)    
+                        ___qtablewidgetitem8 = self.tableWidget.horizontalHeaderItem(8)
+                        ___qtablewidgetitem8.setText(QCoreApplication.translate("MainWindow", u"Thời gian nhận diện", None));
+                        ___qtablewidgetitem8.setTextColor(QColor(255, 255, 255))
+                        ___qtablewidgetitem8.setFont(font)
+                        ___qtablewidgetitem9 = self.tableWidget.horizontalHeaderItem(9)
+                        ___qtablewidgetitem9.setText(QCoreApplication.translate("MainWindow", u"Ảnh", None));
+                        ___qtablewidgetitem9.setTextColor(QColor(255, 255, 255))
+                        ___qtablewidgetitem9.setFont(font)
 
 
         def get_list_report(self):
@@ -529,6 +564,8 @@ class PAGEREPORT(QDialog):
                 self.list_reports = get_reports_db(self.video_id, page_num, page_size, start_timestamp, end_timestamp, begin_age, end_age, gender, mask, isface)
                 print(f"Length list_reports: {len(self.list_reports)}")
                 for report in self.list_reports:
+                        report['percent_face'] = 0
+                        report['percent_person'] = 0
                         if len(report['images']) > 0:
                                 self.list_reports_filter.append(report)
                         else:
@@ -596,15 +633,18 @@ class PAGEREPORT(QDialog):
                                 item = QTableWidgetItem()
                                 item.setData(Qt.DecorationRole, pixmap_color)
                                 self.tableWidget.setItem(i, 5, item)
+
+                        self.tableWidget.setItem(i, 6, QTableWidgetItem(str(report['percent_face'])))
+                        self.tableWidget.setItem(i, 7, QTableWidgetItem(str(report['percent_person'])))
                         
                         # time_start = QDateTime.fromString(self.time, date_time_format)
                         time_target = QDateTime.fromSecsSinceEpoch(report['time'])
                         time_string = time_target.toString(date_time_format)
-
-                        self.tableWidget.setItem(i, 6, QTableWidgetItem(str(time_string)))
+                        self.tableWidget.setItem(i, 8, QTableWidgetItem(str(time_string)))
 
                         list_path_face_image = []
                         list_path_person_image = []
+                        list_original_image_path = []
                         # List face image
                         for image_class in report['images']:
                                 image_path = image_class['path']
@@ -612,31 +652,42 @@ class PAGEREPORT(QDialog):
                                         list_path_face_image.append(image_path)
                                 elif 'person' in os.path.basename(image_path):
                                         list_path_person_image.append(image_path)
-                        if len(list_path_face_image) > 0:
-                                image_path = list_path_face_image[len(list_path_face_image)//2]
+                                else:
+                                        list_original_image_path.append(image_path)
+                        print(f"Length face: {len(list_path_face_image)} Length person: {len(list_path_person_image)} path_original: {len(list_original_image_path)}")
+                        if len(report['images']) > 0:
+                                if len(list_path_face_image) > 0:
+                                        image_path = list_path_face_image[len(list_path_face_image)//2]
+                                elif len(list_path_person_image) > 0:
+                                        image_path = list_path_person_image[len(list_path_person_image)//2]
+                                else:
+                                        image_path = list_original_image_path[len(list_original_image_path)//2]
                         else:
-                                image_path = list_path_person_image[len(list_path_person_image)//2]
-                        print(f"Length face: {len(list_path_face_image)} Length person: {len(list_path_person_image)} path: {image_path}")
-                        absolute_image_path = QFileInfo(image_path).absoluteFilePath()
-                        
-                        image = cv2.imread(absolute_image_path)
-                        if image.shape[0] > image.shape[1]:
-                                image = cv2.resize(image, (int(128 * image.shape[1] / image.shape[0]),128))
+                                image_path = None
+                        if image_path is not None:
+                                image = cv2.imread(image_path)
+                                if image.shape[0] > image.shape[1]:
+                                        image = cv2.resize(image, (int(128 * image.shape[1] / image.shape[0]),128))
+                                else:
+                                        image = cv2.resize(image, (128, int(128 * image.shape[0] / image.shape[1])))
+
+                                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                                # Convert image to QImage
+                                height, width, channel = image.shape
+                                bytes_per_line = 3 * width
+                                q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+
+                                # Set the image to the QLabel
+                                pixmap = QPixmap.fromImage(q_image)
+
+                                item = QTableWidgetItem()
+                                item.setData(Qt.DecorationRole, pixmap)
+                                self.tableWidget.setItem(i, 9, item)
                         else:
-                                image = cv2.resize(image, (128, int(128 * image.shape[0] / image.shape[1])))
-
-                        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                        # Convert image to QImage
-                        height, width, channel = image.shape
-                        bytes_per_line = 3 * width
-                        q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
-
-                        # Set the image to the QLabel
-                        pixmap = QPixmap.fromImage(q_image)
-
-                        item = QTableWidgetItem()
-                        item.setData(Qt.DecorationRole, pixmap)
-                        self.tableWidget.setItem(i, 7, item)
+                                pixmap = QPixmap()
+                                item = QTableWidgetItem()
+                                item.setData(Qt.DecorationRole, pixmap)
+                                self.tableWidget.setItem(i, 9, item)
                         self.tableWidget.setRowHeight(i, pixmap.height())
                         self.tableWidget.setColumnWidth(4, pixmap.width() + 20)
 
@@ -673,7 +724,7 @@ class PAGEREPORT(QDialog):
                 b = np.asarray(b) / np.linalg.norm(b)
                 return 1. - np.dot(a, b.T)
         
-        def import_image_query(self):
+        def import_image_query_face(self):
                 file_dialog = QFileDialog()
                 file_dialog.setNameFilter("Image files (*.jpeg *.jpg *.png)")
                 file_dialog.setFileMode(QFileDialog.ExistingFiles)
@@ -683,7 +734,19 @@ class PAGEREPORT(QDialog):
                         self.list_file_path = file_dialog.selectedFiles()
                         if len(self.list_file_path) > 0:
                                 loading_screen = LoadingScreen(self)
-                                loading_screen.import_loading()
+                                loading_screen.face_filter_loading()
+        
+        def import_image_query_person(self):
+                file_dialog = QFileDialog()
+                file_dialog.setNameFilter("Image files (*.jpeg *.jpg *.png)")
+                file_dialog.setFileMode(QFileDialog.ExistingFiles)
+                file_dialog.setViewMode(QFileDialog.Detail)
+
+                if file_dialog.exec_():
+                        self.list_file_path = file_dialog.selectedFiles()
+                        if len(self.list_file_path) > 0:
+                                loading_screen = LoadingScreen(self)
+                                loading_screen.person_filter_loading()
                                
         def create_pdf_report(self):
                 try:

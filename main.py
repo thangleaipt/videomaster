@@ -89,7 +89,7 @@ class LoginWindow(QMainWindow):
         response = verify_login(user, password)
         verify = response['verify_status']
         message = response['message']
-        target_date = datetime(2024, 1, 13, 0, 0, 0)
+        target_date = datetime(2024, 2, 5, 0, 0, 0)
         target_timestamp = target_date.timestamp()
         current_timestamp = time.time()
         if current_timestamp < target_timestamp:
@@ -101,7 +101,7 @@ class LoginWindow(QMainWindow):
             else:
                 QMessageBox.warning(self, "Lỗi đăng nhập", f"{message}", QMessageBox.Ok)
         else: 
-            QMessageBox.warning(self, "Hết hạn đăng nhập")
+            QMessageBox.warning(self, "Hết hạn đăng nhập", f"Vui lòng liên hệ AIPT AI để được hỗ trợ!", QMessageBox.Ok)
         
 
     def mousePressEvent(self, event):
