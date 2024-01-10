@@ -93,6 +93,7 @@ class FaceFilterThread(QThread):
                                                 print(f"Tìm khuôn mặt: {max_report['person_name']} - {similarity}%")
 
     def fill_report(self):
+                self.report.list_reports_filter = sorted(self.report.list_reports_filter, key=lambda report: int(report['percent_face']), reverse=True)
                 if len(self.report.list_reports_filter) >= 16:
                         self.report.tableWidget.setRowCount(len(self.report.list_reports_filter))
                 else:
@@ -230,7 +231,7 @@ class PersonFilterThread(QThread):
                                                 index = self.report.list_reports_filter.index(min_report)
                                                 self.report.list_reports_filter[index]['percent_person'] = round((1-dist) * 100, 2)
     def fill_report(self):
-                self.report.list_reports_filter = sorted(self.report.list_reports_filter, key=lambda report: report['percent_face'], reverse=False)
+                self.report.list_reports_filter = sorted(self.report.list_reports_filter, key=lambda report: int(report['percent_person']), reverse=True)
                 if len(self.report.list_reports_filter) >= 16:
                         self.report.tableWidget.setRowCount(len(self.report.list_reports_filter))
                 else:

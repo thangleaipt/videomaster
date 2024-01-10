@@ -94,7 +94,7 @@ class SubVideoAnalyze(QRunnable):
                 if self.frame_width > 1280:
                     cv2.resize(frame, (1280, 720))
                 self.index_frame += 1
-                if self.index_frame % int(self.fps/5) == 0:
+                if self.index_frame % int(round(self.fps)/5) == 0:
                     image = frame.copy()
                     self.face_analyzer.index_frame = self.index_frame  
                     time_start_recognition = time.time()
@@ -145,7 +145,7 @@ class SubVideoAnalyze(QRunnable):
                 iou_matrix[i, j] = self.calculate_iou(face_boxes[j][0], person_boxes[i][0][:4])
         row_ind, col_ind = linear_sum_assignment(-iou_matrix)
         # matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind)]
-        matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind) if iou_matrix[row, col] > 0.1]
+        matched_pairs = [(row, col) for row, col in zip(row_ind, col_ind) if iou_matrix[row, col] > 0]
         return matched_pairs
 
     def get_matched_pairs(self,person_boxes, face_boxes):
@@ -163,7 +163,7 @@ class SubVideoAnalyze(QRunnable):
 
     def calculate_iou(self,box1, box2):
           try:
-              x1, y1, w1, h1 = box1[0], box1[1], box1[2]-box1[0], box1[3]-box1[1]
+              x1, y1, w1, h1 = box1[0], box1[1], box1[2], box1[3]
               x2, y2, w2, h2 = box2[0], box2[1], box2[2], box2[3]
 
               x1_left, x1_right = x1, x1 + w1
